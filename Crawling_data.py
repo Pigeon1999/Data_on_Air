@@ -1,5 +1,4 @@
 import requests
-from bs4 import BeautifulSoup
 import xml.etree.ElementTree as ET
 import pandas as pd 
 
@@ -7,11 +6,12 @@ import pandas as pd
 api_key = '75546c586b70617338367a5858524c'
 url = f'http://openapi.seoul.go.kr:8088/{api_key}/xml/citydata/1/1/POI006'
 
-# 결과값 출력 
+# api 요청&추출
 res = requests.get(url)
 data = res.content
 root = ET.fromstring(data)
 
+# 필요한 변수만 Data Frame형식으로 저장 
 data_list = []
 
 for item in root.findall('CITYDATA'):  # 'item' 태그에 데이터가 있는 경우
