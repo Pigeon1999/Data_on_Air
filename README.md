@@ -4,7 +4,8 @@
 
 # 프로젝트 주제
 - 후보 1 : A 카페의 매출 분석&예측
-- 후보 2 : 상권 매출 분석&예측 
+- 후보 2 : 상권 매출 분석&예측
+- 후보 3 : 대학 예산 예측 
 
 # 프로젝트 목표 
 1. 카페/상권의 매출량 분석&시각화 
@@ -15,7 +16,9 @@
 - 프로젝트 : 2023.07.25 ~ 2023.08.31 (6주)
 
 # 데이터 출처 
-서울시 실시간 도시데이터 https://data.seoul.go.kr/dataList/OA-21285/A/1/datasetView.do
+서울시 실시간 도시데이터 https://data.seoul.go.kr/dataList/OA-21285/A/1/datasetView.do  
+기상청자료개방포털 -종관기상관측(ASOS) https://data.kma.go.kr/data/grnd/selectAsosRltmList.do?pgmNo=36  
+A 카페의 샘플 데이터
 
 # 기술 스택 
 - Python
