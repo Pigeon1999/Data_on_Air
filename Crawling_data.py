@@ -1,5 +1,4 @@
 import requests
-import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 
 # 인증키 
