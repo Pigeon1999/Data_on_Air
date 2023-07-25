@@ -24,9 +24,8 @@ A 카페의 샘플 데이터 [A카페_매출_상세내역sample.xlsx](https://gi
 기상자료개방포털 : [https://data.kma.go.kr/cmmn/main.do](https://data.kma.go.kr/data/grnd/selectAsosRltmList.do?pgmNo=36)
 
 ### 데이터 설명 
-1. 서울시 실시간 도시데이터 : 세대별 인구 비율, 유동 인구 비율, 도로 교통 데이터, 주차장 데이터, 날씨 데이터 등등
-2. A 카페의 샘플 데이터 : A 카페의 키오스크, POS기 결제 데이터
-3. 네이버 데이터랩 : 특정 기간에 A카페를 검색 횟수
+1. A 카페의 샘플 데이터 : A 카페의 키오스크, POS기 결제 데이터
+2. 네이버 데이터랩 : 특정 기간에 A카페를 검색 횟수
 
 # 기술 스택 
 - Python
