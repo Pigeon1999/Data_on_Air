@@ -20,7 +20,6 @@
 
 # 데이터 출처 
 서울시 실시간 도시데이터 https://data.seoul.go.kr/dataList/OA-21285/A/1/datasetView.do  
-기상청자료개방포털 - 종관기상관측(ASOS) https://data.kma.go.kr/data/grnd/selectAsosRltmList.do?pgmNo=36  
 A 카페의 샘플 데이터 [A카페_매출_상세내역sample.xlsx](https://github.com/Pigeon1999/Data_on_Air/files/12156826/_.22.07.01-22.12.31.xlsx)
 
 
