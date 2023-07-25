@@ -1,5 +1,4 @@
 import requests
-import xml.etree.ElementTree as ET
 import pandas as pd 
 from bs4 import BeautifulSoup
 
