@@ -4,12 +4,16 @@ from bs4 import BeautifulSoup
 
 # 인증키 
 api_key = '75546c586b70617338367a5858524c'
-url = f'http://openapi.seoul.go.kr:8088/{api_key}/xml/citydata/1/1/POI006'
+url = f'http://openapi.seoul.go.kr:8088/{api_key}/xml/citydata/0/5/POI006'
 
 # api 추출
 res = requests.get(url)
 soup = BeautifulSoup(res.text, 'lxml-xml')
 
+print(soup.find_all('list_total_count'))
+
+
+"""
 # 필요한 변수만 Data Frame형식으로 저장 
 data_list = []
 
@@ -41,3 +45,4 @@ for item in soup.find_all('CITYDATA'):  # 필요한 변수 설정
     
 df = pd.DataFrame(data_list)
 print(data_list)
+"""
