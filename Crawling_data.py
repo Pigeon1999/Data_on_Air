@@ -6,27 +6,29 @@
 import requests
 import pandas as pd 
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
-"""
-current_date = datetime(2023, 7, 25).date()
+# 데이터를 받기 원하는 시점(날짜)
+current_date = datetime(2023, 7, 21).date()
 
+# DataFrame으로 변환하기 위한 임의의 리스트
+data_list = []
+
+# current_date에서 오늘까지의 범위
 while (datetime.now().date() > current_date):
 
     str_date = current_date.strftime('%x')
     STDR_DE_ID = f'20{str_date[6:8]}{str_date[0:2]}{str_date[3:5]}'
      
-    for TMZON_PD_SE in range(25):
+    for hour in range(25):
         api_key = '75546c586b70617338367a5858524c'
-        url = f'http://openapi.seoul.go.kr:8088/{api_key}/xml/SPOP_LOCAL_RESD_JACHI/1/1000/20230726/{TMZON_PD_SE:02d}/11110'
+        url = f'http://openapi.seoul.go.kr:8088/{api_key}/xml/SPOP_LOCAL_RESD_JACHI/1/1000/{STDR_DE_ID}/{hour:02d}/11110'
 
-        # api 추출
+        # 크롤링
         res = requests.get(url)
         soup = BeautifulSoup(res.text, 'lxml-xml')
 
-        # 필요한 변수만 Data Frame형식으로 저장 
-        data_list = []
-
+        # 변수들을 리스트에 저장
         for item in soup.find_all('row'):  # 필요한 변수 설정
             STDR_DE_ID = item.find('STDR_DE_ID').text
             TMZON_PD_SE = item.find('TMZON_PD_SE').text
@@ -71,19 +73,12 @@ while (datetime.now().date() > current_date):
                             'FEMALE_F40T44_LVPOP_CO' : FEMALE_F40T44_LVPOP_CO, 'FEMALE_F45T49_LVPOP_CO' : FEMALE_F45T49_LVPOP_CO, 'FEMALE_F50T54_LVPOP_CO' : FEMALE_F50T54_LVPOP_CO,
                             'FEMALE_F55T59_LVPOP_CO' : FEMALE_F55T59_LVPOP_CO, 'FEMALE_F60T64_LVPOP_CO' : FEMALE_F60T64_LVPOP_CO, 'FEMALE_F65T69_LVPOP_CO' : FEMALE_F65T69_LVPOP_CO,
                             'FEMALE_F70T74_LVPOP_CO' : FEMALE_F70T74_LVPOP_CO })
+                       
     print(f'{STDR_DE_ID} : done')
 
-    # 다음 
+    # 다음날
     current_date = current_date + timedelta(days = 1)
-      
+    
+# date_list를 DataFrame으로 변환
 df = pd.DataFrame(data_list)
 print(df)
-"""
-
-api_key = '75546c586b70617338367a5858524c'
-url = f'http://openapi.seoul.go.kr:8088/{api_key}/xml/SPOP_LOCAL_RESD_JACHI/1/1000/20230701/00/11110'
-
-# api 추출
-res = requests.get(url)
-soup = BeautifulSoup(res.text, 'lxml-xml')
-print(soup.text)
