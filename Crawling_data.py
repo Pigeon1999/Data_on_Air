@@ -3,6 +3,8 @@
 # 자치구 단위 서울 생활인구(내국인)의 데이터는 2018-02-15부터 2023-07-21까지의 데이터가 존재합니다. (2023-07-26기준)
 # 종로구 자치구 코드는 11110입니다. 
 # 인증키는 75546c586b70617338367a5858524c입니다.
+
+"""
 import requests
 import pandas as pd 
 from bs4 import BeautifulSoup
@@ -80,5 +82,25 @@ while (datetime.now().date() > current_date):
     current_date = current_date + timedelta(days = 1)
     
 # date_list를 DataFrame으로 변환
-df = pd.DataFrame(data_list)
+df = pd.DataFrame(data_list) 
 print(df)
+"""
+
+
+# 기상청 API허브 : 지상관측 https://apihub.kma.go.kr/
+# 지상관측 데이터입니다. 
+# 인증키는 ixgIZqVXRhuYCGalVyYbQg 입니다. 
+# stn의 서울코드는 108입니다. 
+
+import requests
+import json
+from datetime import datetime, timedelta
+
+now_date = datetime.now().date().strftime('%x')
+tm1 = '202307210000'
+tm2 = f'20{now_date[6:8]}{now_date[0:2]}{now_date[3:5]}'
+url = f'https://apihub.kma.go.kr/api/json?tm1={tm1}&tm2={tm2}&stn=108&help=0&authKey=ixgIZqVXRhuYCGalVyYbQg'
+
+res = requests.get(url)
+print(res.text)
+
