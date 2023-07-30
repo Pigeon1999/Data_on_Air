@@ -37,10 +37,10 @@
 ## 3. 데이터 수집
 - 네이버 뉴스 리스트 크롤링 (날짜, 뉴스 url, 뉴스 title 등등)
 - 리스트에 있는 각각의 뉴스의 본문 크롤링 (뉴스 title, 날짜, 본문, 댓글 통계(성별, 연령대) 등등)
+![뉴스크롤링파트](https://github.com/Pigeon1999/Data_on_Air/assets/98893114/c6409e4b-9269-495e-82be-3e41e8d665a7)
 - if) 만약 웹을 구현하게 된다면... : 사용자 정보 데이터 자체 수집
-  
-![구상도1](https://github.com/Pigeon1999/Data_on_Air/assets/98893114/bd3e8ea9-8373-4404-a41c-cc28a661b969)
-  
+![구상도1](https://github.com/Pigeon1999/Data_on_Air/assets/98893114/c664b57f-4b18-4d24-9f0b-e71640916c93)
+
 ## 4. 데이터 탐색 - 데이터 간의 관계 이해 
 
 ## 5. 데이터 모델링 - 데이터 분석, 시각화
