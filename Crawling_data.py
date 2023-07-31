@@ -1,7 +1,7 @@
 # 2023-07-31 22:04 시작 
 # https://factcheck.snu.ac.kr/?topic_id=2
 # SNU팩트체크 경제 분야 크롤링 
-
+# """ 지금 일단 결과가 나와용 """
 import time
 import pandas as pd
 from selenium import webdriver  # 셀레니움을 활성화
@@ -27,5 +27,3 @@ column = ['주체', '분류', '뉴스 제목', '출처', '사실 여부']
 
 df = pd.DataFrame(element_texts, columns = column)
 print(df)
-
-""" 지금 일단 결과가 나와용 """
