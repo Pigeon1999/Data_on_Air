@@ -27,3 +27,5 @@ column = ['주체', '분류', '뉴스 제목', '출처', '사실 여부']
 
 df = pd.DataFrame(element_texts, columns = column)
 print(df)
+
+""" 지금 일단 결과가 나와용 """
