@@ -1,106 +1,29 @@
-# https://data.seoul.go.kr/dataList/OA-15439/S/1/datasetView.do
-# 자치구 단위 서울 생활인구(내국인)의 크롤링 코드입니다. 
-# 자치구 단위 서울 생활인구(내국인)의 데이터는 2018-02-15부터 2023-07-21까지의 데이터가 존재합니다. (2023-07-26기준)
-# 종로구 자치구 코드는 11110입니다. 
-# 인증키는 75546c586b70617338367a5858524c입니다.
+# 2023-07-31 22:04 시작 
+# https://factcheck.snu.ac.kr/?topic_id=2
+# SNU팩트체크 경제 분야 크롤링 
 
-"""
-import requests
-import pandas as pd 
-from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+import time
+import pandas as pd
+from selenium import webdriver  # 셀레니움을 활성화
+from selenium.webdriver import ActionChains  # 액션체인 활성화
+from selenium.webdriver.common.by import By
 
-# 데이터를 받기 원하는 시점(날짜)
-current_date = datetime(2023, 7, 21).date()
+url = 'https://factcheck.snu.ac.kr/?topic_id=2'
 
-# DataFrame으로 변환하기 위한 임의의 리스트
-data_list = []
+dr = webdriver.Chrome()  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
+dr.get(url)  # 드라이버를 통해 url의 웹 페이지를 오픈
+time.sleep(2)
 
-# current_date에서 오늘까지의 범위
-while (datetime.now().date() > current_date):
+act = ActionChains(dr)  # 드라이버에 동작을 실행시키는 명령어를 act로 지정
+elements = dr.find_elements(by = By.CSS_SELECTOR, value = '.fact-check-card-container.jsx-18931043') 
 
-    str_date = current_date.strftime('%x')
-    STDR_DE_ID = f'20{str_date[6:8]}{str_date[0:2]}{str_date[3:5]}'
-     
-    for hour in range(25):
-        api_key = '75546c586b70617338367a5858524c'
-        url = f'http://openapi.seoul.go.kr:8088/{api_key}/xml/SPOP_LOCAL_RESD_JACHI/1/1000/{STDR_DE_ID}/{hour:02d}/11110'
+element_texts = []
+for element in elements:
+    print(element_texts)
+    temp = element.text.split('\n')
+    element_texts.append(temp)
 
-        # 크롤링
-        res = requests.get(url)
-        soup = BeautifulSoup(res.text, 'lxml-xml')
+column = ['주체', '분류', '뉴스 제목', '출처', '사실 여부']
 
-        # 변수들을 리스트에 저장
-        for item in soup.find_all('row'):  # 필요한 변수 설정
-            STDR_DE_ID = item.find('STDR_DE_ID').text
-            TMZON_PD_SE = item.find('TMZON_PD_SE').text
-            ADSTRD_CODE_SE = item.find('ADSTRD_CODE_SE').text
-            TOT_LVPOP_CO = item.find('TOT_LVPOP_CO').text
-            MALE_F0T9_LVPOP_CO = item.find('MALE_F0T9_LVPOP_CO').text
-            MALE_F10T14_LVPOP_CO = item.find('MALE_F10T14_LVPOP_CO').text
-            MALE_F15T19_LVPOP_CO = item.find('MALE_F15T19_LVPOP_CO').text
-            MALE_F20T24_LVPOP_CO = item.find('MALE_F20T24_LVPOP_CO').text
-            MALE_F25T29_LVPOP_CO = item.find('MALE_F25T29_LVPOP_CO').text
-            MALE_F30T34_LVPOP_CO = item.find('MALE_F30T34_LVPOP_CO').text
-            MALE_F35T39_LVPOP_CO = item.find('MALE_F35T39_LVPOP_CO').text
-            MALE_F40T44_LVPOP_CO = item.find('MALE_F40T44_LVPOP_CO').text
-            MALE_F45T49_LVPOP_CO = item.find('MALE_F45T49_LVPOP_CO').text
-            MALE_F50T54_LVPOP_CO = item.find('MALE_F50T54_LVPOP_CO').text
-            MALE_F55T59_LVPOP_CO = item.find('MALE_F55T59_LVPOP_CO').text
-            MALE_F60T64_LVPOP_CO = item.find('MALE_F60T64_LVPOP_CO').text
-            MALE_F65T69_LVPOP_CO = item.find('MALE_F65T69_LVPOP_CO').text
-            MALE_F70T74_LVPOP_CO = item.find('MALE_F70T74_LVPOP_CO').text
-            FEMALE_F0T9_LVPOP_CO = item.find('FEMALE_F0T9_LVPOP_CO').text
-            FEMALE_F10T14_LVPOP_CO = item.find('FEMALE_F10T14_LVPOP_CO').text
-            FEMALE_F15T19_LVPOP_CO = item.find('FEMALE_F15T19_LVPOP_CO').text
-            FEMALE_F20T24_LVPOP_CO = item.find('FEMALE_F20T24_LVPOP_CO').text
-            FEMALE_F25T29_LVPOP_CO = item.find('FEMALE_F25T29_LVPOP_CO').text
-            FEMALE_F30T34_LVPOP_CO = item.find('FEMALE_F30T34_LVPOP_CO').text
-            FEMALE_F35T39_LVPOP_CO = item.find('FEMALE_F35T39_LVPOP_CO').text
-            FEMALE_F40T44_LVPOP_CO = item.find('FEMALE_F40T44_LVPOP_CO').text
-            FEMALE_F45T49_LVPOP_CO = item.find('FEMALE_F45T49_LVPOP_CO').text
-            FEMALE_F50T54_LVPOP_CO = item.find('FEMALE_F50T54_LVPOP_CO').text
-            FEMALE_F55T59_LVPOP_CO = item.find('FEMALE_F55T59_LVPOP_CO').text
-            FEMALE_F60T64_LVPOP_CO = item.find('MALE_F60T64_LVPOP_CO').text
-            FEMALE_F65T69_LVPOP_CO = item.find('MALE_F65T69_LVPOP_CO').text
-            FEMALE_F70T74_LVPOP_CO = item.find('FEMALE_F70T74_LVPOP_CO').text
-            data_list.append({'STDR_DE_ID' : STDR_DE_ID, 'TMZON_PD_SE' : TMZON_PD_SE, 'ADSTRD_CODE_SE' : ADSTRD_CODE_SE, 'TOT_LVPOP_CO' : TOT_LVPOP_CO, 
-                            'MALE_F0T9_LVPOP_CO' : MALE_F0T9_LVPOP_CO, 'MALE_F10T14_LVPOP_CO' : MALE_F10T14_LVPOP_CO, 'MALE_F15T19_LVPOP_CO' : MALE_F15T19_LVPOP_CO,
-                            'MALE_F20T24_LVPOP_CO' : MALE_F20T24_LVPOP_CO, 'MALE_F25T29_LVPOP_CO' : MALE_F25T29_LVPOP_CO, 'MALE_F30T34_LVPOP_CO' : MALE_F30T34_LVPOP_CO,
-                            'MALE_F35T39_LVPOP_CO' : MALE_F35T39_LVPOP_CO, 'MALE_F40T44_LVPOP_CO' : MALE_F40T44_LVPOP_CO, 'MALE_F45T49_LVPOP_CO' : MALE_F45T49_LVPOP_CO,
-                            'MALE_F50T54_LVPOP_CO' : MALE_F50T54_LVPOP_CO, 'MALE_F55T59_LVPOP_CO' : MALE_F55T59_LVPOP_CO, 'MALE_F60T64_LVPOP_CO' : MALE_F60T64_LVPOP_CO,
-                            'MALE_F65T69_LVPOP_CO' : MALE_F65T69_LVPOP_CO, 'MALE_F70T74_LVPOP_CO' : MALE_F70T74_LVPOP_CO, 'FEMALE_F0T9_LVPOP_CO' : FEMALE_F0T9_LVPOP_CO,
-                            'FEMALE_F10T14_LVPOP_CO' : FEMALE_F10T14_LVPOP_CO, 'FEMALE_F15T19_LVPOP_CO' : FEMALE_F15T19_LVPOP_CO, 'FEMALE_F20T24_LVPOP_CO' : FEMALE_F20T24_LVPOP_CO,
-                            'FEMALE_F25T29_LVPOP_CO' : FEMALE_F25T29_LVPOP_CO, 'FEMALE_F30T34_LVPOP_CO' : FEMALE_F30T34_LVPOP_CO, 'FEMALE_F35T39_LVPOP_CO' : FEMALE_F35T39_LVPOP_CO,
-                            'FEMALE_F40T44_LVPOP_CO' : FEMALE_F40T44_LVPOP_CO, 'FEMALE_F45T49_LVPOP_CO' : FEMALE_F45T49_LVPOP_CO, 'FEMALE_F50T54_LVPOP_CO' : FEMALE_F50T54_LVPOP_CO,
-                            'FEMALE_F55T59_LVPOP_CO' : FEMALE_F55T59_LVPOP_CO, 'FEMALE_F60T64_LVPOP_CO' : FEMALE_F60T64_LVPOP_CO, 'FEMALE_F65T69_LVPOP_CO' : FEMALE_F65T69_LVPOP_CO,
-                            'FEMALE_F70T74_LVPOP_CO' : FEMALE_F70T74_LVPOP_CO })
-                       
-    print(f'{STDR_DE_ID} : done')
-
-    # 다음날
-    current_date = current_date + timedelta(days = 1)
-    
-# date_list를 DataFrame으로 변환
-df = pd.DataFrame(data_list) 
+df = pd.DataFrame(element_texts, columns = column)
 print(df)
-"""
-
-
-# 기상청 API허브 : 지상관측 https://apihub.kma.go.kr/
-# 지상관측 데이터입니다. 
-# 인증키는 ixgIZqVXRhuYCGalVyYbQg 입니다. 
-# stn의 서울코드는 108입니다. 
-
-import requests
-import json
-from datetime import datetime, timedelta
-
-now_date = datetime.now().date().strftime('%x')
-tm1 = '202307210000'
-tm2 = f'20{now_date[6:8]}{now_date[0:2]}{now_date[3:5]}'
-url = f'https://apihub.kma.go.kr/api/json?tm1={tm1}&tm2={tm2}&stn=108&help=0&authKey=ixgIZqVXRhuYCGalVyYbQg'
-
-res = requests.get(url)
-print(res.text)
-
