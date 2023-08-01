@@ -20,14 +20,16 @@ time.sleep(4)
 
 act = ActionChains(dr)  # 드라이버에 동작을 실행시키는 명령어를 act로 지정
 
+
 # 공지사항 지우기 : 가장 먼저 배치
 btn_outline_secondary = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
 btn_outline_secondary_click = act.click(on_element = btn_outline_secondary[4]).perform()
 
-column = ['주체', '분류', '뉴스 제목', '출처', '사실 여부']
-df = pd.DataFrame(columns = column)
 
-for i in range(0, 1): ### 크롤링 페이지 횟수 지정!!! ###
+element_text = []
+column = ['주체', '분류', '뉴스 제목', '출처', '사실 여부']
+
+for i in range(0, 10): ### 크롤링 페이지 횟수 지정!!! ###
     
     time.sleep(2)
     
@@ -38,7 +40,8 @@ for i in range(0, 1): ### 크롤링 페이지 횟수 지정!!! ###
     for element in find_elements:
         try:
             temp = element.text.split('\n')
-            
+            if len(temp) == 5:
+                element_text.append(temp)
         except:
             continue
 
@@ -58,4 +61,6 @@ for i in range(0, 1): ### 크롤링 페이지 횟수 지정!!! ###
     
     print('done')
         
+df = pd.DataFrame(element_text, columns = column)
 print(df)
+
