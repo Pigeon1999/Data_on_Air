@@ -1,4 +1,5 @@
 # 2023-07-31 22:04 시작 
+# 2023-08-03 15:18 완성(?)
 # https://factcheck.snu.ac.kr/?topic_id=2
 # SNU팩트체크 경제 분야 크롤링 
 import time # 시간 지연
