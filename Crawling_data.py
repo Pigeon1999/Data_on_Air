@@ -20,29 +20,69 @@ time.sleep(4)
 
 act = ActionChains(dr)  # 드라이버에 동작을 실행시키는 명령어를 act로 지정
 
+
 # 공지사항 지우기
 btn_outline_secondary = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
 btn_outline_secondary_click = act.click(on_element = btn_outline_secondary[4]).perform()
 
-
+row_id = 0
 element_text = []
-column = ['주체', '분류', '뉴스 제목', '출처', '사실 여부', '출처 링크']
+data = []
+#column = ['주체', '분류', '뉴스 제목', '출처', '사실 여부', '본문']
+"""
+row_id -> 새로 생성 
+주제-> '경제'로 고정 
+내용 -> 뉴스 제목 
+상세내용 -> 본문 
+주장/검증 매체 -> 주체
+label -> 사실 여부 
 
+분류 -> 삭제 xx
+출처 -> 삭제 xx 
+"""
+column = ['row_id', '주제', '내용', '상세내용', '주장/검증 매체', 'label']
 
 for i in range(0, 1): ### 크롤링 페이지 횟수 지정!!! ###
     
     time.sleep(2)
     
     # 뉴스 데이터 크롤링
-    find_elements = dr.find_elements(by = By.CSS_SELECTOR, value = '.fact-check-card-container.jsx-18931043') 
     
-    for element in find_elements:
+    for element in range(0,10):
         try:
-            temp = element.text.split('\n')
-            href = element.find_element(by = By.TAG_NAME, value = 'a').get_attribute('href')
-            temp.append(href)
-            if len(temp) <= 6:
-                element_text.append(temp)
+            find_elements = dr.find_elements(by = By.CSS_SELECTOR, value = '.fact-check-card-container.jsx-18931043') 
+            temp = find_elements[element].text.split('\n') # '주체', '분류', '뉴스 제목', '출처', '사실 여부'
+            
+            # 본문
+            class_name = find_elements[element].find_element(by = By.TAG_NAME, value = 'hr').get_attribute('class')
+            click_page = find_elements[element].find_element(by = By.CSS_SELECTOR, value = f'.fact-check-title.{class_name}')
+            
+            Scroll_down = dr.execute_script(f'window.scrollTo(0, {400 * element})')
+    
+            time.sleep(1)
+            
+            act.click(click_page).perform() # 페이지 넘기기 
+            
+            time.sleep(5)
+            
+            React_content = dr.find_element(by = By.XPATH, value = '/html/body/div/div/div[2]/div/div[1]/div/div[3]/div[3]/div/div/div/div')
+
+            texts = ''
+            for i in React_content.find_elements(by = By.TAG_NAME, value = 'p'):
+                texts = texts + i.text
+            
+            dr.back()   
+            
+            time.sleep(2) 
+            
+            data = [row_id, '경제', temp[2], texts, temp[0], temp[4]] # row_id
+
+            print(data)
+            
+            if len(data) <= 7:
+                element_text.append(data)
+                
+            row_id = row_id + 1 # row_id
         except:
             continue
 
@@ -52,7 +92,6 @@ for i in range(0, 1): ### 크롤링 페이지 횟수 지정!!! ###
 
     # 웹 페이지 넘기기 : dataframe으로 만들고나서 배치
     current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
-    #print(search_page[1].text) = 1
     click_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
 
     for page in click_page:
@@ -64,3 +103,50 @@ for i in range(0, 1): ### 크롤링 페이지 횟수 지정!!! ###
         
 df = pd.DataFrame(element_text, columns = column)
 print(df)
+
+
+'''
+find_main_content = dr.find_elements(by = By.CSS_SELECTOR, value = '.fact-check-card-container.jsx-18931043')
+class_name = find_main_content[0].find_element(by = By.TAG_NAME, value = 'hr').get_attribute('class')
+click_page = find_main_content[0].find_element(by = By.CSS_SELECTOR, value = f'.fact-check-title.{class_name}')
+act.click(click_page).perform() # 페이지 넘기기
+
+time.sleep(2)
+
+React_content = dr.find_element(by = By.XPATH, value = '/html/body/div/div/div[2]/div/div[1]/div/div[3]/div[3]/div/div/div/div')
+print(React_content)
+
+texts = ''
+for i in React_content.find_elements(by = By.TAG_NAME, value = 'p'):
+    texts = texts + i.text
+
+print(texts)
+
+
+
+for main_title in range(0,10):
+    find_main_content = dr.find_elements(by = By.CSS_SELECTOR, value = '.fact-check-card-container.jsx-18931043')
+    class_name = find_main_content[main_title].find_element(by = By.TAG_NAME, value = 'hr').get_attribute('class')
+    click_page = find_main_content[main_title].find_element(by = By.CSS_SELECTOR, value = f'.fact-check-title.{class_name}')
+    
+    Scroll_down = dr.execute_script(f'window.scrollTo(0, {400 * main_title})')
+    
+    time.sleep(2)
+    
+    act.click(click_page).perform() # 페이지 넘기기 
+    
+    time.sleep(2)
+    
+    React_content = dr.find_element(by = By.XPATH, value = '/html/body/div/div/div[2]/div/div[1]/div/div[3]/div[3]/div/div/div/div')
+    print(React_content)
+
+    texts = ''
+    for i in React_content.find_elements(by = By.TAG_NAME, value = 'p'):
+        texts = texts + i.text
+
+    print(texts)
+    
+    dr.back()   
+    
+    time.sleep(2) 
+'''
