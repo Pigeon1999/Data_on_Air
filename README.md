@@ -20,7 +20,7 @@
 - Flask (기능 구현한 것을 웹으로 표현)
 
 # 프로젝트 구상도 
-![구상도1](https://github.com/Pigeon1999/Data_on_Air/assets/98893114/5280ae80-32bf-47e2-be12-869f6de78314)
+![257055560-5280ae80-32bf-47e2-be12-869f6de78314](https://github.com/Pigeon1999/Data_on_Air/assets/98893114/2d21f92b-c0ee-4cc7-b64a-9f6421618713)
 
 # 프로젝트 계획 
 ## 1. 연구 목표 설정 
