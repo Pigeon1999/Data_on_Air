@@ -38,7 +38,7 @@ def Crawling_data(page):
     data = []
     column = ['row_id', '주제', '내용', '상세내용', '주장/검증 매체', 'label']
 
-    for page_num in range(1, page): ### 크롤링 페이지 횟수 지정!!!     
+    for page_num in range(1, page + 1): ### 크롤링 페이지 횟수 지정!!!     
         # 뉴스 데이터 크롤링
         for element in range(0,10): 
             try: 
@@ -56,17 +56,48 @@ def Crawling_data(page):
                 # 본문           
                 tmp = dr.find_element(by = By.XPATH,  value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[{element + 1}]/div/div[2]/div[1]/div[1]/div[1]')                   
                 Scroll_down = dr.execute_script(f'window.scrollTo(0, {390 * element})')
-                time.sleep(1)    
-                act.click(tmp).perform() # 페이지 넘기기     
-                time.sleep(4)    
+                
+                time.sleep(1)   
+                
+                act.click(tmp).perform() # 페이지 넘기기    
+                
+                time.sleep(5) 
+                
                 React_content = dr.find_element(by = By.XPATH, value = '/html/body/div/div/div[2]/div/div[1]/div/div[3]/div[3]/div/div/div/div')
                 texts = ''
                 for k in React_content.find_elements(by = By.TAG_NAME, value = 'p'):
                     texts = texts + k.text
+                    
+                try:
+                    try:
+                        try:
+                            for i in range(1, 10):
+                                Summary_content_1 = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[3]/ul/li[{i}]').text
+                                texts = texts + Summary_content_1
+                        except:
+                            for j in range(1, 30):
+                                temp_text = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[5]/div/div/div/p[{j}]').text
+                                if temp_text != '[검증 대상]' and temp_text != '[검증 방법]' and temp_text != '[검증 내용]' and temp_text != '[검증 결과]':
+                                    texts = texts + temp_text            
+                    except:
+                        try:
+                            for i in range(1, 10):
+                                Summary_content_2 = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[3]/p[{i}]').text
+                                texts = texts + Summary_content_2
+                        except:
+                            for j in range(1, 30):
+                                temp_text = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[5]/div/div/div/p[{j}]').text
+                                if temp_text != '[검증 대상]' and temp_text != '[검증 방법]' and temp_text != '[검증 내용]' and temp_text != '[검증 결과]':
+                                    texts = texts + temp_text  
+                except:
+                    pass
+                
                 dr.back()   
                 time.sleep(1) 
+                
                 data = [row_id, '경제', temp[2], texts, temp[0], temp[4]] # row_id
                 print(data)
+                
                 if len(data) <= 6:
                     element_text.append(data)   
                 row_id = row_id + 1 # row_id      
@@ -98,7 +129,7 @@ def Turn_page(page_num):
         
 def Create_csv(df):
     # CSV 파일로 저장
-    df.to_csv('D:\Download\SNU_factcheck.csv', index=False)
+    df.to_csv('D:\Download\SNU_factcheck_temp.csv', index=False)
     
-df = Crawling_data(21)
+df = Crawling_data(10)
 Create_csv(df)
