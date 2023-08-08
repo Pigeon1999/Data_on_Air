@@ -38,7 +38,7 @@ def Crawling_data(page):
     data = []
     column = ['row_id', '주제', '내용', '상세내용', '주장/검증 매체', 'label']
 
-    for page_num in range(16, page): ### 크롤링 페이지 횟수 지정!!!     
+    for page_num in range(1, page): ### 크롤링 페이지 횟수 지정!!!     
         # 뉴스 데이터 크롤링
         for element in range(0,10): 
             try: 
@@ -98,7 +98,7 @@ def Turn_page(page_num):
         
 def Create_csv(df):
     # CSV 파일로 저장
-    df.to_csv('D:\Download\SNU_factcheck_4.csv', index=False)
+    df.to_csv('D:\Download\SNU_factcheck.csv', index=False)
     
 df = Crawling_data(21)
 Create_csv(df)
