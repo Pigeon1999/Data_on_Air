@@ -27,7 +27,7 @@ dynamic_page = Dynamic_Page()
 dr = dynamic_page.dr
 act = dynamic_page.act
 
-def Crawling_data(page):
+def Crawling_data(start, end):
 
     # 공지사항 지우기
     btn_outline_secondary = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
@@ -38,7 +38,7 @@ def Crawling_data(page):
     data = []
     column = ['row_id', '주제', '내용', '상세내용', '주장/검증 매체', 'label']
 
-    for page_num in range(1, page + 1): ### 크롤링 페이지 횟수 지정!!!     
+    for page_num in range(start, end + 1): ### 크롤링 페이지 횟수 지정!!!     
         # 뉴스 데이터 크롤링
         for element in range(0,10): 
             try: 
@@ -131,5 +131,5 @@ def Create_csv(df):
     # CSV 파일로 저장
     df.to_csv('D:\Download\SNU_factcheck_temp.csv', index=False)
     
-df = Crawling_data(10)
+df = Crawling_data(start, end)
 Create_csv(df)
