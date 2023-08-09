@@ -1,7 +1,3 @@
-# 2023-07-31 22:04 시작 
-# 2023-08-03 15:18 완성(?)
-# https://factcheck.snu.ac.kr/?topic_id=2
-# SNU팩트체크 경제 분야 크롤링 
 import time # 시간 지연
 import pandas as pd # 데이터 프레임 생성
 from selenium import webdriver  # 셀레니움을 활성화
@@ -16,6 +12,9 @@ class Dynamic_Page:
 
         self.chrome_options = Options()
         self.chrome_options.add_experimental_option('detach', True) # 브라우저 꺼짐 방지
+        self.chrome_options.add_argument('--headless')
+        self.chrome_options.add_argument('--no-sandbox')
+        self.chrome_options.add_argument("--disable-dev-shm-usage")
 
         self.dr = webdriver.Chrome(options = self.chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
         self.dr.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
