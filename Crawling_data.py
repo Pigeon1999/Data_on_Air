@@ -129,7 +129,7 @@ def Turn_page(page_num):
         
 def Create_csv(df):
     # CSV 파일로 저장
-    df.to_csv('D:\Download\SNU_factcheck_temp.csv', index=False)
+    df.to_csv('D:\Download\SNU_factcheck_11_30.csv', index=False)
     
-df = Crawling_data(start, end)
+df = Crawling_data(11, 30)
 Create_csv(df)
