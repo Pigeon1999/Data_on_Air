@@ -1,131 +1,86 @@
-from bs4 import BeautifulSoup
-import requests
-import re
-import datetime
-from tqdm import tqdm
-import sys
-
-def ex_tag(sid, date):
-    ### 뉴스 분야(sid)와 페이지(page)를 입력하면 그에 대한 링크들을 리스트로 추출하는 함수 ###
-
-    ## 1.
-    url = f"https://news.naver.com/main/list.naver?mode=LS2D&mid=shm&sid2=259&sid1={sid}&date={date}"# 원하는 날짜로 변경 (예: 2023년 8월 1일)
-    html = requests.get(url, headers={"User-Agent": "Mozilla/5.0"\
-    "(Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "\
-    "Chrome/110.0.0.0 Safari/537.36"})
-    soup = BeautifulSoup(html.text, "lxml")
-    a_tag = soup.find_all("a")
-
-    ## 2.
-    tag_lst = []
-    for a in a_tag:
-        if "href" in a.attrs:  # href가 있는것만 고르는 것
-            if (f"sid={sid}" in a["href"]) and ("article" in a["href"]):
-                tag_lst.append(a["href"])
-
-    return tag_lst
-
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
-
-def crawling_naver():
-  data_list = []
-  num = 0
-  date = datetime(2023, 1, 1)
-
-  for month in range(1,8):
-    for day in range(1,32): # 30일 이하인 2월은 오류가 발생....
-      date_int = int(f'{date.year}{date.month:02d}{date.day:02d}')
-      for url in ex_tag(101, date_int):
-        if num < 100:
-          num = num + 1
-          data_list.append(url)
-        else:
-          pass
-      if date.month == 2 and date.day == 28:
-        pass
-      elif (date.month == 1 or date.month == 3 or date.month == 5 or date.month == 7) and date.day == 31:
-        pass
-      elif (date.month == 4 or date.month == 6) and date.day == 30:
-        pass
-      else:
-       date = date + timedelta(days = 1)
-    print(date.year, date.month, '....done')
-    num = 0
-    date = datetime(2023, date.month + 1, 1)
-
-  return data_list
-
-naver_list = crawling_naver()
-len(naver_list) #700개인것 확인
-print(naver_list)
-
-def art_crawl(all_hrefs, index):
-    """
-    sid와 링크 인덱스를 넣으면 기사제목, 날짜, 본문을 크롤링하여 딕셔너리를 출력하는 함수
-
-    Args:
-        all_hrefs(dict): 각 분야별로 100페이지까지 링크를 수집한 딕셔너리 (key: 분야(sid), value: 링크)
-        sid(int): 분야 [100: 정치, 101: 경제, 102: 사회, 103: 생활/문화, 104: 세계, 105: IT/과학]
-        index(int): 링크의 인덱스
-
-    Returns:
-        dict: 기사제목, 날짜, 본문이 크롤링된 딕셔너리
-
-    """
-    art_dic = {}
-
-    ## 1.
-    title_selector = "#title_area > span"
-    date_selector = "#ct > div.media_end_head.go_trans > div.media_end_head_info.nv_notrans"\
-    "> div.media_end_head_info_datestamp > div:nth-child(1) > span"
-    main_selector = "#dic_area"
-
-    url = all_hrefs[index]
-    html = requests.get(url, headers = {"User-Agent": "Mozilla/5.0 "\
-    "(Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"\
-    "Chrome/110.0.0.0 Safari/537.36"})
-    soup = BeautifulSoup(html.text, "lxml")
-
-    ## 2.
-    # 제목 수집
-    title = soup.select(title_selector)
-    title_lst = [t.text for t in title]
-    title_str = "".join(title_lst)
-
-    # 날짜 수집
-    date = soup.select(date_selector)
-    date_lst = [d.text for d in date]
-    date_str = "".join(date_lst)
-
-    # 본문 수집
-    main = soup.select(main_selector)
-    main_lst = []
-    for m in main:
-        m_text = m.text
-        m_text = m_text.strip()
-        main_lst.append(m_text)
-    main_str = "".join(main_lst)
-
-    ## 3.
-    art_dic["title"] = title_str
-    art_dic["date"] = date_str
-    art_dic["main"] = main_str
-
-    return art_dic
-
-
-artdic_lst = []
-for i in tqdm(range(len(naver_list))):
-   art_dic = art_crawl(naver_list, i)
-   art_dic["url"] = naver_list[i]
-   artdic_lst.append(art_dic)
-
-
+from selenium import webdriver
+from bs4 import BeautifulSoup as bs
 import pandas as pd
-art_df = pd.DataFrame(artdic_lst)
-art_df
+import time
+import os
+
+# ------------------------------------ ↓↓↓ Selenium Firefox 설정 ↓↓↓ ------------------------------------ #
+# headless mode 사용
+options = webdriver.FirefoxOptions()
+options.headless = True
+
+# binary 경로
+firefox_binary_path = "/usr/bin/firefox-esr"
+options.binary_location = firefox_binary_path
+
+# display port 설정
+display_port = os.environ.get("DISPLAY_PORT", "99")
+display = f":{display_port}"
+os.environ["DISPLAY"] = display
+
+# Xvfb 서버 시작
+xvfb_cmd = f"Xvfb {display} -screen 0 1920x1080x24 -nolisten tcp &"
+os.system(xvfb_cmd)
+
+# 파이어폭스 드라이브 시작
+driver = webdriver.Firefox(options=options)
+# ------------------------------------ ↑↑↑ Selenium Firefox 설정 ↑↑↑ ------------------------------------ #
 
 
+# ------------------------------------ ↓↓↓ 함수 설정 ↓↓↓ ------------------------------------ #
+# 원하는 keyword와 탐색 범위 pageNumber 입력 시 네이버 기사 링크 리턴
+def get_url_list(driver, keyword, page_number):
+    links = []
+    for i in range(1, page_number + 1):
+        url = f'https://search.naver.com/search.naver?where=news&sm=tab_jum&query={keyword}&start={i}'
+        driver.get(url)
+        time.sleep(1)
+        soup = bs(driver.page_source, 'html.parser')
+        link_tags = soup.select('a.info')  # 클래스가 'info'인 모든 <a> 태그 선택
+        filtered_links = [link['href'] for j, link in enumerate(link_tags) if 'naver' in link['href']] # 'naver'가 링크에 포함된 경우만 추출
+        links.extend(filtered_links)  # 링크 속성(href)값을 리스트로 추가
+    return links
 
-art_df.to_csv("article_df.csv")
+# 기사 정보 추출
+def get_news_info(driver, url, data_dict):
+    driver.get(url)
+    time.sleep(1)
+    soup = bs(driver.page_source, 'html.parser')
+    title = soup.select_one("#title_area > span")
+    main = soup.select("#dic_area")
+    press = soup.select_one("em.media_end_linked_more_point")
+    
+    if title:
+        title_str = title.get_text().strip()
+    else:
+        title_str = "No Title"
+    
+    if main:
+        main_lst = [m.get_text().strip() for m in main]
+        main_str = " ".join(main_lst)
+    else:
+        main_str = "No Main Content"
+    
+    if press:
+        press_str = press.get_text()
+    else:
+        press_str = "No Press Info"
+    
+    data_dict["내용"].append(title_str)
+    data_dict["상세내용"].append(main_str)
+    data_dict["주장/검증매체"].append(press_str)
+# ------------------------------------ ↑↑↑ 함수 설정 ↑↑↑ ------------------------------------ #
+
+keyword_list = ['새마을', '탄소포집']
+    
+content_total_dict = {'내용': [], '상세내용': [], '주장/검증매체': []}
+    
+for keyword in keyword_list:
+    url_list = get_url_list(driver, keyword, 10)
+    for url in url_list:
+        get_news_info(driver, url, content_total_dict)
+    
+df = pd.DataFrame(content_total_dict)
+df.to_csv('naver.csv', index=True, index_label='row_data')
+
+driver.quit()
