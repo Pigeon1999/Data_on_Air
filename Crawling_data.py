@@ -139,7 +139,7 @@ def Crawling_data(start, end):
     print(df)
     
     # CSV 파일로 저장
-    df.to_csv('D:\Download\SNU_factcheck_11_20.csv', index=False)
+    df.to_csv(f'D:\Download\SNU_factcheck_{start}_{end}.csv', index=False)
     
 def Turn_page(page_num):
     current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
