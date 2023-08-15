@@ -158,9 +158,5 @@ def Turn_page(page_num):
             current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
             click_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
         
-def Create_csv(df):
-    # CSV 파일로 저장
-    df.to_csv('D:\Download\SNU_factcheck_11_20.csv', index=False)
-    
-df = Crawling_data(11, 20)
-Create_csv(df)
+Crawling_data(11, 20)
+
