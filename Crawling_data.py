@@ -39,6 +39,7 @@ def Crawling_data(start, end):
         for element in range(0,10): 
             try: 
                 Turn_page(page_num)
+                print(f'{page_num}페이지, {element}번째')
                 
                 time.sleep(1)
                 
@@ -137,7 +138,8 @@ def Crawling_data(start, end):
     df = pd.DataFrame(element_text, columns = column)
     print(df)
     
-    return df
+    # CSV 파일로 저장
+    df.to_csv(f'D:\Download\SNU_factcheck_{start}_{end}.csv', index=False)
     
 def Turn_page(page_num):
     current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
@@ -156,15 +158,4 @@ def Turn_page(page_num):
             current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
             click_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
         
-def Create_csv(df):
-    # CSV 파일로 저장
-<<<<<<< HEAD
-    df.to_csv('D:\Download\SNU_factcheck_31_40.csv', index=False)
-    
-df = Crawling_data(31, 40)
-=======
-    df.to_csv('D:\Download\SNU_factcheck_1_20.csv', index=False)
-    
-df = Crawling_data(1, 20)
->>>>>>> 8567972193525a9329003d96f9227b836f78d419
-Create_csv(df)
+Crawling_data(11, 20)
