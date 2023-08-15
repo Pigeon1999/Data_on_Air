@@ -39,6 +39,7 @@ def Crawling_data(start, end):
         for element in range(0,10): 
             try: 
                 Turn_page(page_num)
+                print(f'{page_num}페이지, {element}번째')
                 
                 time.sleep(1)
                 
@@ -158,7 +159,7 @@ def Turn_page(page_num):
         
 def Create_csv(df):
     # CSV 파일로 저장
-    df.to_csv('D:\Download\SNU_factcheck_1_20.csv', index=False)
+    df.to_csv('D:\Download\SNU_factcheck_11_20.csv', index=False)
     
-df = Crawling_data(1, 20)
+df = Crawling_data(11, 20)
 Create_csv(df)
