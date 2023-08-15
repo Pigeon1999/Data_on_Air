@@ -49,7 +49,10 @@ def Crawling_data(start, end):
                 temp[2] = dr.find_element(by = By.XPATH,  value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[{element + 1}]/div/div[2]/div[1]/div[1]/div[1]').text
                 temp[3] = dr.find_element(by = By.XPATH,  value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[{element + 1}]/div/div[2]/div[1]/div[1]/div[2]').text[4:]
                 temp[4] = dr.find_element(by = By.XPATH,  value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[{element + 1}]/div/div[2]/div[1]/div[2]/div[4]').text
-
+                print(temp)
+                
+                time.sleep(2)
+                
                 # 본문           
                 tmp = dr.find_element(by = By.XPATH,  value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[{element + 1}]/div/div[2]/div[1]/div[1]/div[1]')                   
                 Scroll_down = dr.execute_script(f'window.scrollTo(0, {390 * element})')
@@ -158,5 +161,5 @@ def Turn_page(page_num):
             current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
             click_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
         
-Crawling_data(11, 20)
+Crawling_data(1, 30)
 
