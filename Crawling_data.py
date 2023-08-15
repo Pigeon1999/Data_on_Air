@@ -12,9 +12,6 @@ class Dynamic_Page:
 
         self.chrome_options = Options()
         self.chrome_options.add_experimental_option('detach', True) # 브라우저 꺼짐 방지
-        self.chrome_options.add_argument('--headless')
-        self.chrome_options.add_argument('--no-sandbox')
-        self.chrome_options.add_argument("--disable-dev-shm-usage")
 
         self.dr = webdriver.Chrome(options = self.chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
         self.dr.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
@@ -56,11 +53,11 @@ def Crawling_data(start, end):
                 tmp = dr.find_element(by = By.XPATH,  value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[{element + 1}]/div/div[2]/div[1]/div[1]/div[1]')                   
                 Scroll_down = dr.execute_script(f'window.scrollTo(0, {390 * element})')
                 
-                time.sleep(1)   
+                time.sleep(2)   
                 
                 act.click(tmp).perform() # 페이지 넘기기    
                 
-                time.sleep(5) 
+                time.sleep(6) 
                 
                 React_content = dr.find_element(by = By.XPATH, value = '/html/body/div/div/div[2]/div/div[1]/div/div[3]/div[3]/div/div/div/div')
                 texts = ''
@@ -92,7 +89,7 @@ def Crawling_data(start, end):
                     pass
                 
                 dr.back()   
-                time.sleep(1) 
+                time.sleep(2) 
                 
                 data = [row_id, '경제', temp[2], texts, temp[0], temp[4]] # row_id
                 print(data)
@@ -119,7 +116,7 @@ def Turn_page(page_num):
                 if int(page.text) == int(current_page[1].text) + 1:
                     # 웹 스크롤 내리기 : dataframe으로 만들고나서 배치
                     Scroll_down = dr.execute_script('window.scrollTo(0, 5000)')
-                    time.sleep(1)                 
+                    time.sleep(2)                 
                     act.click(page).perform()               
                     break
                 
@@ -128,7 +125,7 @@ def Turn_page(page_num):
         
 def Create_csv(df):
     # CSV 파일로 저장
-    df.to_csv('D:\Download\SNU_factcheck_31_50.csv', index=False)
+    df.to_csv('D:\Download\SNU_factcheck_60_65.csv', index=False)
     
-df = Crawling_data(31, 50)
+df = Crawling_data(60, 65)
 Create_csv(df)
