@@ -41,7 +41,7 @@ def Crawling_data(start, end):
                 Turn_page(page_num)
                 print(f'{page_num}페이지, {element}번째')
                 
-                time.sleep(1)
+                time.sleep(2)
                 
                 temp = [0, 0, 0, 0, 0] # '주체', '분류', '뉴스 제목', '출처', '사실 여부'
                 temp[0] = dr.find_element(by = By.XPATH,  value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[{element + 1}]/div/div[1]/div[2]/div[1]').text
@@ -128,5 +128,5 @@ def Turn_page(page_num):
             current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
             click_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
         
-Crawling_data(31, 50)
+Crawling_data(31, 40)
 
