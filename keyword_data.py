@@ -60,7 +60,7 @@ class label(pre_process):
         self.df.index = self.df['row_id']
         self.df['row_id'] = self.df['row_id'].astype(int)
         self.df['label'] = self.df['label'].astype(int)
-   
+
         return self.df
     
 # 2. '내용, 상세내용'의 특수문자 제거, 불용어 제거, 맞춤법 조정       
@@ -239,7 +239,7 @@ class Word_Embedding(pre_process):
                 break
             else:
                 max_len = max_len + 1
-   
+
 # 5. BiLSTM 모델 학습 
 class BiLSTM(pre_process):
     def make_BiLSTM(self):
@@ -290,14 +290,14 @@ def predict_model(x_test, y_test):
     correct_data = 0
     score = loaded_model.predict(x_test) # 예측
     for i in range(0, len(x_test)):
-      if(score[i][1] > 0.5):
-        print(f"{score[i][1] * 100:.2f}% 확률로 참입니다. <실제 판단 여부 : {y_test[i]}>")
-        if y_test[i] == 1:
-          correct_data = correct_data + 1
-      else:
-        print(f"{(1 - score[i][1]) * 100:.2f}% 확률로 거짓입니다. <실제 판단 여부 : {y_test[i]}>")
-        if y_test[i] == 0:
-          correct_data = correct_data + 1
+        if(score[i][1] > 0.5):
+            print(f"{score[i][1] * 100:.2f}% 확률로 참입니다. <실제 판단 여부 : {y_test[i]}>")
+            if y_test[i] == 1:
+                correct_data = correct_data + 1
+        else:
+            print(f"{(1 - score[i][1]) * 100:.2f}% 확률로 거짓입니다. <실제 판단 여부 : {y_test[i]}>")
+            if y_test[i] == 0:
+                correct_data = correct_data + 1
     print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
