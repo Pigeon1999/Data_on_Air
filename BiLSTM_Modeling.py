@@ -60,6 +60,16 @@ class label(pre_process):
         self.df['row_id'] = self.df['row_id'].astype(int)
         self.df['label'] = self.df['label'].astype(int)
 
+        T = len(self.df[self.df['label'] == 1])
+        F = len(self.df[self.df['label'] == 0])
+
+        max_num = abs(T - F)
+        self.df = self.df.drop(self.df[self.df['label'] == 0].tail(max_num).index)
+        
+        T = len(self.df[self.df['label'] == 1])
+        F = len(self.df[self.df['label'] == 0])
+        print(f'TF갯수 : {T}개씩.. 1:1비율')
+        
         return self.df
     
 # 2. '내용, 상세내용'의 특수문자 제거, 불용어 제거, 맞춤법 조정       
@@ -346,5 +356,8 @@ predict_model(pre_process.x_test, pre_process.y_test) --> 테스트 데이터 x,
 100.00% 확률로 거짓입니다. <실제 판단 여부 : 0.0>
 정답률 1개중 1개 정답.
 100.00%
+
+20230816 23:59
+- label_processing() : TF비율 1:1로 맞추는 기능 추가.
 
 '''
