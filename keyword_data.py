@@ -182,7 +182,7 @@ class token(pre_process):
             word_counts = Counter(text)
             most_common_words = word_counts.most_common()
 
-            most_common_words_only = [word for word, count in most_common_words if count > 2]
+            most_common_words_only = [word for word, count in most_common_words if count > 0] # 20230816 나중에 수정하세요
             temp_data.append(len(most_common_words_only))
 
         self.df['temp'] = temp_data
@@ -265,8 +265,7 @@ class BiLSTM(pre_process):
         loaded_model = load_model('trained_BiLSTM_model')   
         print("테스트 정확도: %.4f" % (loaded_model.evaluate(pre_process.x_test, pre_process.y_test)[1]))
     
-def make_model():
-    csv = pd.read_csv('/content/SNU_factcheck_sample.csv', encoding = 'cp949')
+def preprocessing(csv):
     Pre_process = pre_process(csv)
     df = Pre_process.df
 
@@ -279,6 +278,9 @@ def make_model():
     Token = token(df)
     df = Token.token_processing()
 
+    return df
+
+def make_model(df):
     word_embedding = Word_Embedding(df)
     word_embedding.word_embedding()
 
@@ -302,7 +304,14 @@ def predict_model(x_test, y_test):
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
 ''' 
-1. make_model 함수
+1. preprocessig 함수 
+csv = pd.read_csv('파일 주소', encoding = 'cp949')
+df = preprocessing(csv)
+print(df)
+
+** 토큰 빈도수 0으로 했으니 나중에 2로 수정하세요  (185번째 줄)
+
+2. make_model 함수
 [실행코드]
 main()
 
