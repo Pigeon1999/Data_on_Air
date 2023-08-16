@@ -313,14 +313,15 @@ def predict_model(x_test, y_test):
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
 ''' 
-1. preprocessig 함수 
+<1. preprocessig 함수>
 csv = pd.read_csv('파일 주소', encoding = 'cp949')
 df = preprocessing(csv)
 print(df)
 
 ** 토큰 빈도수 0으로 했으니 나중에 2로 수정하세요  (185번째 줄)
 
-2. make_model 함수
+---------------------------------------------------------------------------------------------------------------------------------------------
+<2. make_model 함수>
 [실행코드]
 main()
 
@@ -347,7 +348,8 @@ WARNING:absl:Found untraced functions such as lstm_cell_31_layer_call_fn, lstm_c
 1/1 [==============================] - 2s 2s/step - loss: 0.0000e+00 - accuracy: 1.0000
 테스트 정확도: 1.0000
 
-2. predict_model 함수
+-----------------------------------------------------------------------------------------------------------------------------------------------
+<3. predict_model 함수>
 [실행코드]
 predict_model(pre_process.x_test, pre_process.y_test) --> 테스트 데이터 x, y
 
