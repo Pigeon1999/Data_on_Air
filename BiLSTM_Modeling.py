@@ -55,21 +55,12 @@ class label(pre_process):
         self.df = self.df.drop(idx, axis=0)
         self.df= self.df.drop(columns=['주제'])
         self.df['label'] = self.df['label'].replace({'전혀 사실 아님': 0, '대체로 사실 아님': 0, '절반의 사실': 0, '대체로 사실': 1, '사실': 1})
+
         self.df['row_id'] = range(0, len(self.df))
         self.df.index = self.df['row_id']
         self.df['row_id'] = self.df['row_id'].astype(int)
         self.df['label'] = self.df['label'].astype(int)
 
-        T = len(self.df[self.df['label'] == 1])
-        F = len(self.df[self.df['label'] == 0])
-
-        max_num = abs(T - F)
-        self.df = self.df.drop(self.df[self.df['label'] == 0].tail(max_num).index)
-        
-        T = len(self.df[self.df['label'] == 1])
-        F = len(self.df[self.df['label'] == 0])
-        print(f'TF갯수 : {T}개씩.. 1:1비율')
-        
         return self.df
     
 # 2. '내용, 상세내용'의 특수문자 제거, 불용어 제거, 맞춤법 조정       
@@ -216,7 +207,8 @@ class Word_Embedding(pre_process):
         x = self.df['상세내용']
         y = self.df['label']
 
-        pre_process.x_train, pre_process.x_test, pre_process.y_train, pre_process.y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+        pre_process.x_train, pre_process.x_test, pre_process.y_train, pre_process.y_test = train_test_split(x, y, test_size=0.2, stratify=y, random_state=42)
+        print(f'TF갯수 : {int(len(pre_process.y_train) / 2)}개씩.. 1:1비율')
 
         # 정수 인코딩
         tokenizer = Tokenizer(pre_process.vocab_size, oov_token = 'OOV')
@@ -228,11 +220,11 @@ class Word_Embedding(pre_process):
         print('리뷰의 최대 길이 :',max(len(review) for review in pre_process.x_train))
         print('리뷰의 평균 길이 :',sum(map(len, pre_process.x_train))/len(pre_process.x_train))
         
-        max_len = max(len(review) for review in pre_process.x_train)
+        max_len = ((max(len(review) for review in pre_process.x_train) // 100) - 1) * 100
         while True:
             count = 0
             for sentence in pre_process.x_train:
-                if(len(sentence) <= (max_len // 10) * 10):
+                if len(sentence) <= max_len:
                     count = count + 1
                 
             rate = (count / len(pre_process.x_train)) * 100
@@ -242,9 +234,9 @@ class Word_Embedding(pre_process):
                 pre_process.x_train = pad_sequences(pre_process.x_train, maxlen=max_len)
                 pre_process.x_test = pad_sequences(pre_process.x_test, maxlen=max_len)
 
-                # label 타입 변경
+                # label 타입 변경   
                 pre_process.y_train = np.array(pre_process.y_train).astype(np.float32)
-                pre_process.y_test = np.array(pre_process.y_test).astype(np.float32)
+                pre_process.y_test = np.array(pre_process.y_test).astype(np.float32)    
                 break
             else:
                 max_len = max_len + 1
@@ -312,6 +304,11 @@ def predict_model(x_test, y_test):
     print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
+csv = pd.read_csv("D:\Download\SNU_factcheck_20230816.csv", encoding = 'cp949')
+df = preprocessing(csv)
+make_model(df)
+predict_model(pre_process.x_test, pre_process.y_test)
+
 ''' 
 <1. preprocessig 함수>
 csv = pd.read_csv('파일 주소', encoding = 'cp949')
@@ -323,7 +320,7 @@ print(df)
 ---------------------------------------------------------------------------------------------------------------------------------------------
 <2. make_model 함수>
 [실행코드]
-main()
+make_model(df)
 
 [결과]
    row_id	주제	내용	                                                        상세내용	                                                               주장/검증 매체	          label
