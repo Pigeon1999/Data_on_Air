@@ -68,13 +68,6 @@ def Crawling_data(start, end):
                 for k in React_content.find_elements(by = By.TAG_NAME, value = 'p'):
                     texts = texts + k.text
                     
-                    
-                #Summary_content = [f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[3]/ul/li[{i}]',
-                #                   f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[3]/p[{i}]']   
-                
-                #verified_content = [f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[5]/div/div/div/p[{j}]',
-                #                    f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[3]/div/div/div/p[{j}]']
-                 
                 try: 
                     try:
                         try:
@@ -98,32 +91,6 @@ def Crawling_data(start, end):
                                     texts = texts + temp_text  
                 except:
                     pass
-                
-                '''
-                try:
-                    try:
-                        try:
-                            for i in range(1, 10):
-                                Summary_content_1 = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[3]/ul/li[{i}]').text
-                                texts = texts + Summary_content_1
-                        except:
-                            for j in range(1, 30):
-                                temp_text = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[5]/div/div/div/p[{j}]').text
-                                if temp_text != '[검증 대상]' and temp_text != '[검증 방법]' and temp_text != '[검증 내용]' and temp_text != '[검증 결과]':
-                                    texts = texts + temp_text            
-                    except:
-                        try:
-                            for i in range(1, 10):
-                                Summary_content_2 = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[3]/p[{i}]').text
-                                texts = texts + Summary_content_2
-                        except:
-                            for j in range(1, 30):
-                                temp_text = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[2]/div[1]/div[2]/div[5]/div/div/div/p[{j}]').text
-                                if temp_text != '[검증 대상]' and temp_text != '[검증 방법]' and temp_text != '[검증 내용]' and temp_text != '[검증 결과]':
-                                    texts = texts + temp_text  
-                except:
-                    pass
-                '''
                 
                 dr.back()   
                 time.sleep(2) 
