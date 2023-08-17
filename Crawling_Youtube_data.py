@@ -14,6 +14,9 @@ import pandas as pd
 import time
 import re
 import os
+import ast
+import csv
+from collections import Counter
 
 '''
 # ------------------------------------ ↓↓↓ Selenium Firefox 설정 ↓↓↓ ------------------------------------ #
@@ -77,17 +80,18 @@ class Youtube_Crawling:
         time.sleep(2)
         
         data_list = []
-        column = ['주제', '내용', '상세내용', '주장/검증매체', 'label', 'link', 'view', 'upload_date']
+        column = ['주제', '내용', '상세내용', '주장/검증매체']
         num = 0
         while True:
             link = ''
             title = ''
             live_tag = ''
+            claim = ''
             num = num + 1
             
             try:
                 live_tag = self.driver.find_element(by = By.XPATH, value = f'/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[{num}]/div[1]/div/ytd-badge-supported-renderer/div[1]/span').text   
-                if live_tag == '새 동영상':
+                if live_tag == '새 동영상' or live_tag == '실시간':
                     continue                                  
             except:                                                  
                 try:
@@ -95,12 +99,14 @@ class Youtube_Crawling:
                         title = self.driver.find_element(by = By.XPATH, value = f'/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[{num}]/div[1]/div/div[1]/div/h3/a/yt-formatted-string').text
                         href_tag  = self.driver.find_element(by = By.XPATH, value = f'/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[{num}]/div[1]/div/div[1]/div/h3/a')
                         link = href_tag.get_attribute('href')
+                        claim = self.driver.find_element(by = By.XPATH, value = f'/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/ytd-two-column-search-results-renderer/div/ytd-section-list-renderer/div[2]/ytd-item-section-renderer/div[3]/ytd-video-renderer[{num}]/div[1]/div/div[2]/ytd-channel-name/div/div/yt-formatted-string/a').text
                     else:
                         continue
                 except:
-                    pass
+                    df = pd.DataFrame(data_list, columns = column)
+                    break
             
-            print(title, link)
+            #print(title, link)
 
             if link[len("https://www.youtube.com/"):30] == 'shorts':
                 continue  # shorts가 포함된 링크인 경우 pass
@@ -113,26 +119,39 @@ class Youtube_Crawling:
             if text == '' or text == '0':
                 continue
             else:
-                data = [0, title, text, 0, 0, link, 0, 0]
+                data = ["경제", title, text[:700], claim]
                 
-            print(data)
             data_list.append(data)
-            
-            if len(data_list) >= 10:
+            print(data)
+            if len(data_list) >= 5:
                 df = pd.DataFrame(data_list, columns = column)
                 break
-                
+    
+        self.driver.close()
         return df
 
 def crawling_youtube_data():
-    keyword = ["탄소"]
+    df = pd.read_csv("D:\Download\Keyword_data.csv", encoding = 'utf-8')
+    keyword_list = df['상세내용']
+    keyword = []
+    for row in keyword_list:
+        row = ast.literal_eval(row) # 문자열의 리스트화
+        frequency_counter = Counter(row)  # 각 요소의 빈도수 계산
+        top_n_frequencies = frequency_counter.most_common(3)  # 빈도수 상위 n개 선택
+        top_n_elements = [element for element, _ in top_n_frequencies]  # 요소만 추출
+        
+        text = ''
+        for i in top_n_elements:
+            text = text + f'{i} '
+        keyword.append(text)
+    
+    new_df = pd.DataFrame()
     for i in keyword:
-        youtube_crawling = Youtube_Crawling(i)
-        youtube_crawling.searchKeywords().to_csv('output.csv', index=True, index_label='row_data')
+        new_df = new_df.append(Youtube_Crawling(i).searchKeywords(), ignore_index=True) 
+        print(new_df)
+    new_df.to_csv('output.csv', index=True, index_label='row_id')
 
     print("데이터가 'output.csv' 파일로 저장되었습니다.") 
-
-crawling_youtube_data()
 
 '''
 [실행코드]
