@@ -313,7 +313,6 @@ predict_model(pre_process.x_test, pre_process.y_test)
 <1. preprocessig 함수>
 csv = pd.read_csv('파일 주소', encoding = 'cp949')
 df = preprocessing(csv)
-print(df)
 
 ** 토큰 빈도수 0으로 했으니 나중에 2로 수정하세요  (185번째 줄)
 
