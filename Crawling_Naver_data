@@ -37,8 +37,6 @@ def get_top_n_frequencies(input_list, n):
     top_n_elements = [element for element, _ in top_n_frequencies]  # 요소만 추출
     return top_n_elements
 
-
-
 # 각 키워드 마다 긁어오고 싶은 기사의 갯수 = number
 def get_url_list(driver, keyword, desired_count):
     links = []
@@ -76,22 +74,26 @@ def get_news_info(driver, url, data_dict):
     main = soup.select("#dic_area")
     press = soup.select_one("em.media_end_linked_more_point")
     
+    print("기사내용")
     if title:
         title_str = title.get_text().strip()
+        print(title_str)
     else:
-        title_str = "기사 제목 내용 없음"
+        return
     
     if main:
         main_lst = [m.get_text().strip() for m in main]
         main_str = " ".join(main_lst)
     else:
-        main_str = "기사 본문 내용 없음"
+        return
     
     if press:
         press_str = press.get_text()
+        print(press_str)
     else:
-        press_str = "언론사 내용 없음"
+        return
     
+    data_dict["주제"].append("경제")
     data_dict["내용"].append(title_str)
     data_dict["상세내용"].append(main_str)
     data_dict["주장/검증매체"].append(press_str)
@@ -111,6 +113,7 @@ def outCSV(csvColum, topNum, newsNum):
         print('\n')
         for url in url_list:
             get_news_info(driver, url, content_total_dict)
+
         
     df = pd.DataFrame(content_total_dict)
     df.to_csv('naver.csv', index=True, index_label='row_data')
@@ -118,32 +121,10 @@ def outCSV(csvColum, topNum, newsNum):
     return True
 # ------------------------------------ ↑↑↑ 함수 설정 ↑↑↑ ------------------------------------ #
 
-df_snu = pd.read_csv('./csv/SNU.csv', encoding='euc-kr')
+df_snu = pd.read_csv('./csv/SNU.csv', encoding='utf-8')
 
-content_total_dict = {'내용': [], '상세내용': [], '주장/검증매체': []}
+content_total_dict = {'주제' : [], '내용': [], '상세내용': [], '주장/검증매체': []}
 
-outCSV(df_snu['상세내용'], 5, 5)
+outCSV(df_snu['상세내용'], 5, 10)
 
 driver.quit()
-
-# for i in df_snu['상세내용']:
-#     temp = ast.literal_eval(i)
-#     keyword_list = get_top_n_frequencies(temp, 5)
-#     combine = ', '.join(keyword_list) # 키워드 묶어서 한줄로
-#     print(combine)
-    
-#     url_list = get_url_list(driver, combine, 5)
-#     print('\n')
-#     print(url_list)
-#     print('\n')
-#     for url in url_list:
-#         get_news_info(driver, url, content_total_dict)
-        
-#     df = pd.DataFrame(content_total_dict)
-#     df.to_csv('naver.csv', index=True, index_label='row_data')
-# url_list = ['https://search.naver.com/search.naver?where=news&sm=tab_jum&query=자살, 개탄, 금지, 화제, 생산&start=0']
-# print('\n')
-# print(url_list)
-# print('\n')
-# for url in url_list:
-#     get_news_info(driver, url, content_total_dict)
