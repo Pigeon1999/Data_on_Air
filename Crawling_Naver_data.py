@@ -108,5 +108,5 @@ def Crawling_Naver_data():
 
     return new_df
 
-if __name__ == "__main__":
-    Naver_df = Crawling_Naver_data()
+# [실행코드]
+# Naver_df = Crawling_Naver_data()
