@@ -100,10 +100,13 @@ def Crawling_Naver_data():
         
         for url in url_list:
             get_news_info(driver, url, content_total_dict)
-        
-        save_to_csv(content_total_dict, 'intermediate.csv')
+            
+    new_df = pd.DataFrame(content_total_dict)
+    new_df.to_csv('output.csv', index=True, index_label='row_data')
     
     driver.quit()
+
+    return new_df
 
 if __name__ == "__main__":
     Crawling_Naver_data()
