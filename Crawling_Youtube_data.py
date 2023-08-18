@@ -124,7 +124,7 @@ class Youtube_Crawling:
         self.driver.close()
         return df
 
-def crawling_youtube_data(df):
+def Crawling_Youtube_data(df):
     keyword_list = df['상세내용']
     keyword = []
     for row in keyword_list:
