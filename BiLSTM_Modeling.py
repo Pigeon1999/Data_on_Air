@@ -150,7 +150,8 @@ class text(pre_process):
             self.df[content] = corrected_texts
             
         return self.df 
-    
+
+# 3. 토큰화
 class token(pre_process):  
     # '상세내용' 토큰화
     def tokenizer(self, text):
@@ -317,15 +318,15 @@ class BiLSTM(pre_process):
 def preprocessing(csv):
     Pre_process = pre_process(csv)
     df = Pre_process.df
-
+    
     Label = label(df)
-    df = Label.label_processing()
+    df = Label.label_processing() # 1. 주제 없애고 label까지 처리  
 
     Text = text(df)
-    df = Text.text_processing()
+    df = Text.text_processing() # 2. '내용, 상세내용'의 특수문자 제거, 불용어 제거, 맞춤법 조정  
 
     Token = token(df)
-    df = Token.token_processing()
+    df = Token.token_processing() # 3. 토큰화
 
     return df
 
