@@ -1,17 +1,12 @@
 import ast
 import time
-import requests
 import pandas as pd
 from selenium import webdriver
 from collections import Counter
-from bs4 import BeautifulSoup as bs
-from selenium.webdriver import ActionChains  # 액션체인 활성화
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options # 브라우저 꺼짐 방지
 from youtube_transcript_api import YouTubeTranscriptApi
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+
 '''
 # ------------------------------------ ↓↓↓ Selenium Firefox 설정 ↓↓↓ ------------------------------------ #
 # headless mode 사용
@@ -45,11 +40,8 @@ class Youtube_Crawling:
         
         self.driver = webdriver.Chrome(options = self.chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
         self.driver.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
-        time.sleep(4)
-
-        self.act = ActionChains(self.driver)  # 드라이버에 동작을 실행시키는 명령어를 act로 지정
-
-        
+        time.sleep(2)
+    
     def getSubtitle(self, ID):
         try:
             # 동영상의 자막 정보 조회
@@ -63,18 +55,7 @@ class Youtube_Crawling:
         
         return captions
 
-    def searchKeywords(self):        
-        time.sleep(1)
-        '''
-        self.driver.find_element(by = By.XPATH, value = '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/div/ytd-search-header-renderer/div[3]/ytd-button-renderer/yt-button-shape/button/yt-touch-feedback-shape/div/div[2]').click()
-        
-        time.sleep(1)
-        
-        self.driver.find_element(by = By.XPATH, value = '/html/body/ytd-app/ytd-popup-container/tp-yt-paper-dialog/ytd-search-filter-options-dialog-renderer/div[2]/ytd-search-filter-group-renderer[5]/ytd-search-filter-renderer[3]/a/div/yt-formatted-string').click()   
-        
-        time.sleep(2)
-        '''
-        
+    def searchKeywords(self):          
         data_list = []
         column = ['주제', '내용', '상세내용', '주장/검증매체']
         num = 0
@@ -101,8 +82,6 @@ class Youtube_Crawling:
                 except:
                     df = pd.DataFrame(data_list, columns = column)
                     break
-            
-            #print(title, link)
 
             if link[len("https://www.youtube.com/"):30] == 'shorts':
                 continue  # shorts가 포함된 링크인 경우 pass
