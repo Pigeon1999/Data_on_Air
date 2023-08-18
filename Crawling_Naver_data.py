@@ -1,11 +1,13 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup as bs
 from collections import Counter
+from selenium.webdriver.chrome.options import Options # 브라우저 꺼짐 방지
 import pandas as pd
 import time
 import os
 import ast
 
+'''
 # Selenium 설정
 def configure_driver():
     options = webdriver.FirefoxOptions()
@@ -21,6 +23,20 @@ def configure_driver():
     os.system(xvfb_cmd)
 
     return webdriver.Firefox(options=options)
+'''
+
+class Youtube_Crawling:
+    
+    def __init__(self, keyword):
+        self.url = 'https://www.youtube.com/results?search_query={}&sp=CAMSAhAB'.format(keyword)
+
+        self.chrome_options = Options()
+        self.chrome_options.add_argument("headless")
+        
+        self.driver = webdriver.Chrome(options = self.chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
+        self.driver.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
+        time.sleep(2)
+
 
 # 키워드 빈도수 상위 n개 추출 함수
 def get_top_n_frequencies(input_list, n):
@@ -78,7 +94,9 @@ def get_news_info(driver, url, data_dict):
 
 # 메인 함수
 def Crawling_Naver_data(df):
-    driver = configure_driver()
+    chrome_options = Options()
+    chrome_options.add_argument("headless")
+    driver = webdriver.Chrome(options = chrome_options)
     content_total_dict = {'주제': [], '내용': [], '상세내용': [], '주장/검증매체': []}
 
     top_keywords = 3
@@ -95,11 +113,12 @@ def Crawling_Naver_data(df):
             get_news_info(driver, url, content_total_dict)
             
     new_df = pd.DataFrame(content_total_dict)
-    new_df.to_csv('output.csv', index=True, index_label='row_data')
+    new_df.to_csv('Naver_data.csv', index=True, index_label='row_id')
     
     driver.quit()
 
     return new_df
 
 # [실행코드]
-# Naver_df = Crawling_Naver_data(df)
+df = pd.read_csv('D:\DownLoad\SNU_factcheck_keyword_sample.csv', encoding = 'utf-8')
+Naver_df = Crawling_Naver_data(df)
