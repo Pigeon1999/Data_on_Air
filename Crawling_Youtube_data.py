@@ -1,17 +1,17 @@
+import ast
+import time
+import requests
+import pandas as pd
 from selenium import webdriver
+from collections import Counter
+from bs4 import BeautifulSoup as bs
+from selenium.webdriver import ActionChains  # 액션체인 활성화
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options # 브라우저 꺼짐 방지
+from youtube_transcript_api import YouTubeTranscriptApi
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver import ActionChains  # 액션체인 활성화
-from selenium.webdriver.chrome.options import Options # 브라우저 꺼짐 방지
-from bs4 import BeautifulSoup as bs
-from youtube_transcript_api import YouTubeTranscriptApi
-import pandas as pd
-import time
-import ast
-from collections import Counter
-
 '''
 # ------------------------------------ ↓↓↓ Selenium Firefox 설정 ↓↓↓ ------------------------------------ #
 # headless mode 사용
@@ -38,10 +38,10 @@ driver = webdriver.Firefox(options=options)
 class Youtube_Crawling:
     
     def __init__(self, keyword):
-        self.url = 'https://www.youtube.com/results?search_query={}&sp=CAI%253D'.format(keyword)
+        self.url = 'https://www.youtube.com/results?search_query={}&sp=CAMSAhAB'.format(keyword)
 
         self.chrome_options = Options()
-        self.chrome_options.add_experimental_option('detach', True) # 브라우저 꺼짐 방지
+        self.chrome_options.add_argument("headless")
         
         self.driver = webdriver.Chrome(options = self.chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
         self.driver.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
@@ -49,6 +49,7 @@ class Youtube_Crawling:
 
         self.act = ActionChains(self.driver)  # 드라이버에 동작을 실행시키는 명령어를 act로 지정
 
+        
     def getSubtitle(self, ID):
         try:
             # 동영상의 자막 정보 조회
@@ -128,7 +129,7 @@ def Crawling_Youtube_data(df):
     keyword_list = df['상세내용']
     keyword = []
     for row in keyword_list:
-        #row = ast.literal_eval(row) # 문자열의 리스트화
+        row = ast.literal_eval(row) # 문자열의 리스트화
         frequency_counter = Counter(row)  # 각 요소의 빈도수 계산
         top_n_frequencies = frequency_counter.most_common(3)  # 빈도수 상위 n개 선택
         top_n_elements = [element for element, _ in top_n_frequencies]  # 요소만 추출
@@ -142,13 +143,13 @@ def Crawling_Youtube_data(df):
     for i in keyword:
         new_df = new_df.append(Youtube_Crawling(i).searchKeywords(), ignore_index=True) 
         print(new_df)
-    new_df.to_csv('output.csv', index=True, index_label='row_id')
+    new_df.to_csv('Youtube_data.csv', index=True, index_label='row_id')
 
-    print("데이터가 'output.csv' 파일로 저장되었습니다.") 
+    print("데이터가 'Youtube_data.csv' 파일로 저장되었습니다.") 
     
     return new_df
 
-df = pd.read_csv('D:\DownLoad\SNU_factcheck_sample.csv', encoding = 'cp949')
+df = pd.read_csv('D:\DownLoad\SNU_factcheck_keyword_sample.csv', encoding = 'utf-8')
 Crawling_Youtube_data(df)
 
 '''
