@@ -6,41 +6,32 @@ import time
 import os
 import ast
 
-# ------------------------------------ ↓↓↓ Selenium Firefox 설정 ↓↓↓ ------------------------------------ #
-# headless mode 사용
-options = webdriver.FirefoxOptions()
-options.headless = True
+# Selenium 설정
+def configure_driver():
+    options = webdriver.FirefoxOptions()
+    options.headless = True
+    firefox_binary_path = "/usr/bin/firefox-esr"
+    options.binary_location = firefox_binary_path
 
-# binary 경로
-firefox_binary_path = "/usr/bin/firefox-esr"
-options.binary_location = firefox_binary_path
+    display_port = os.environ.get("DISPLAY_PORT", "99")
+    display = f":{display_port}"
+    os.environ["DISPLAY"] = display
 
-# display port 설정
-display_port = os.environ.get("DISPLAY_PORT", "99")
-display = f":{display_port}"
-os.environ["DISPLAY"] = display
+    xvfb_cmd = f"Xvfb {display} -screen 0 1920x1080x24 -nolisten tcp &"
+    os.system(xvfb_cmd)
 
-# Xvfb 서버 시작
-xvfb_cmd = f"Xvfb {display} -screen 0 1920x1080x24 -nolisten tcp &"
-os.system(xvfb_cmd)
+    return webdriver.Firefox(options=options)
 
-# 파이어폭스 드라이브 시작
-driver = webdriver.Firefox(options=options)
-# ------------------------------------ ↑↑↑ Selenium Firefox 설정 ↑↑↑ ------------------------------------ #
-
-
-# ------------------------------------ ↓↓↓ 함수 설정 ↓↓↓ ------------------------------------ #
-
+# 키워드 빈도수 상위 n개 추출 함수
 def get_top_n_frequencies(input_list, n):
-    frequency_counter = Counter(input_list)  # 각 요소의 빈도수 계산
-    top_n_frequencies = frequency_counter.most_common(n)  # 빈도수 상위 n개 선택
-    top_n_elements = [element for element, _ in top_n_frequencies]  # 요소만 추출
+    frequency_counter = Counter(input_list)
+    top_n_elements = [element for element, _ in frequency_counter.most_common(n)]
     return top_n_elements
 
-# 각 키워드 마다 긁어오고 싶은 기사의 갯수 = number
+# 기사 URL 리스트 가져오는 함수
 def get_url_list(driver, keyword, desired_count):
     links = []
-    page_number = 0  # 시작 페이지 번호
+    page_number = 0
 
     while len(links) < desired_count:
         url = f'https://search.naver.com/search.naver?where=news&sm=tab_jum&query={keyword}&start={page_number}'
@@ -48,7 +39,7 @@ def get_url_list(driver, keyword, desired_count):
         driver.get(url)
         time.sleep(1)
         soup = bs(driver.page_source, 'html.parser')
-        link_tags = soup.select('a.info')  # 클래스가 'info'인 모든 <a> 태그 선택
+        link_tags = soup.select('a.info')
         for link in link_tags:
             if 'naver' in link['href']:
                 links.append(link['href'])
@@ -56,16 +47,14 @@ def get_url_list(driver, keyword, desired_count):
                     break
 
         if page_number == 250:
-            print("기사 갯수 : ")
-            print(len(links))
+            print("기사 갯수 : ", len(links))
             return links
 
-        page_number += 10  # 다음 페이지로 이동
+        page_number += 10
 
     return links
 
-
-# 기사 정보 추출
+# 기사 정보 추출 함수
 def get_news_info(driver, url, data_dict):
     driver.get(url)
     time.sleep(1)
@@ -74,57 +63,47 @@ def get_news_info(driver, url, data_dict):
     main = soup.select("#dic_area")
     press = soup.select_one("em.media_end_linked_more_point")
     
-    print("기사내용")
-    if title:
-        title_str = title.get_text().strip()
-        print(title_str)
-    else:
+    if title is None or main is None or press is None:
         return
     
-    if main:
-        main_lst = [m.get_text().strip() for m in main]
-        main_str = " ".join(main_lst)
-    else:
-        return
-    
-    if press:
-        press_str = press.get_text()
-        print(press_str)
-    else:
-        return
+    title_str = title.get_text().strip()
+    main_lst = [m.get_text().strip() for m in main]
+    main_str = " ".join(main_lst)
+    press_str = press.get_text()
     
     data_dict["주제"].append("경제")
     data_dict["내용"].append(title_str)
     data_dict["상세내용"].append(main_str)
     data_dict["주장/검증매체"].append(press_str)
 
-# topNum -> 상위 몇개의 키워드를 사용할 것인지
-# newsNum -> 키워드로 검색해 몇개의 기사를 가져올 것인지
-def outCSV(csvColum, topNum, newsNum):
-    for i in csvColum:
+# CSV로 저장하는 함수
+def save_to_csv(data_dict, filename):
+    df = pd.DataFrame(data_dict)
+    df.to_csv(filename, index=True, index_label='row_data')
+
+# 메인 함수
+def main():
+    driver = configure_driver()
+    
+    df_snu = pd.read_csv('./csv/snu.csv', encoding='utf-8')
+    content_total_dict = {'주제': [], '내용': [], '상세내용': [], '주장/검증매체': []}
+
+    top_keywords = 3
+    news_per_keyword = 5
+
+    for i in df_snu['상세내용']:
         temp = ast.literal_eval(i)
-        keyword_list = get_top_n_frequencies(temp, topNum)
-        combine = ', '.join(keyword_list) # 키워드 묶어서 한줄로
-        print(combine)
+        keyword_list = get_top_n_frequencies(temp, top_keywords)
+        combine = ', '.join(keyword_list)
         
-        url_list = get_url_list(driver, combine, newsNum)
-        print('\n')
-        print(url_list)
-        print('\n')
+        url_list = get_url_list(driver, combine, news_per_keyword)
+        
         for url in url_list:
             get_news_info(driver, url, content_total_dict)
-
         
-    df = pd.DataFrame(content_total_dict)
-    df.to_csv('naver.csv', index=True, index_label='row_data')
+        save_to_csv(content_total_dict, 'intermediate.csv')
+    
+    driver.quit()
 
-    return True
-# ------------------------------------ ↑↑↑ 함수 설정 ↑↑↑ ------------------------------------ #
-
-df_snu = pd.read_csv('./csv/SNU.csv', encoding='utf-8')
-
-content_total_dict = {'주제' : [], '내용': [], '상세내용': [], '주장/검증매체': []}
-
-outCSV(df_snu['상세내용'], 5, 10)
-
-driver.quit()
+if __name__ == "__main__":
+    main()
