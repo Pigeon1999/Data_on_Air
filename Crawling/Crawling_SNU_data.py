@@ -109,7 +109,7 @@ def Crawling_SNU_data(start, end):
     print(df)
     
     # CSV 파일로 저장
-    df.to_csv(f'D:\Download\SNU_factcheck_{start}_{end}.csv', index=False)
+    df.to_csv(f'D:\Download\SNU_factcheck_{start}_{end}.csv', index=False) # 프로젝트 직전에 D:\GitHub\Data_on_Air\Dataset\ 링크로 옮기기
     
 def Turn_page(page_num):
     current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
