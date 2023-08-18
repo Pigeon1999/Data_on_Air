@@ -1,28 +1,27 @@
-import pandas as pd
+
 import re
 import nltk
-import numpy as np
-import tensorflow as tf
 import random
-import csv
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+from konlpy.tag import Okt
 from nltk import sent_tokenize
-from konlpy.tag import Okt
-from hanspell import spell_checker
 from collections import Counter
-from konlpy.tag import Okt
+from nltk.corpus import stopwords
+from hanspell import spell_checker
 from gensim.models import Word2Vec
+from sklearn.metrics import f1_score
+from nltk.tokenize import word_tokenize
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score
+from tensorflow.keras.models import load_model
+from tensorflow.keras.models import Sequential
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dense
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import load_model
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
-from sklearn.metrics import f1_score
+from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dense
 nltk.download('punkt')
 
 # 초기 설정
@@ -375,7 +374,7 @@ def predict_model(x_test, y_test):
 df = pd.read_csv("D:\Download\SNU_factcheck_sample.csv", encoding = 'cp949')
 df = preprocessing(df)
 print(df)
-df.to_csv("D:\Download\SNU_factcheck_keyword_sample.csv")
+#df.to_csv("D:\Download\SNU_factcheck_keyword_sample.csv")
 
 ''' 
 <1. preprocessig 함수>
