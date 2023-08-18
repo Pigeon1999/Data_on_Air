@@ -328,6 +328,8 @@ def preprocessing(csv):
     Token = token(df)
     df = Token.token_processing() # 3. 토큰화
 
+    df.to_csv('SNU_Token_Data.csv')
+            
     return df
 
 def make_model(df):
