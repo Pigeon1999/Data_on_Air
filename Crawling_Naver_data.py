@@ -82,7 +82,7 @@ def save_to_csv(data_dict, filename):
     df.to_csv(filename, index=True, index_label='row_data')
 
 # 메인 함수
-def main():
+def Crawling_Naver_data():
     driver = configure_driver()
     
     df_snu = pd.read_csv('./csv/snu.csv', encoding='utf-8')
@@ -106,4 +106,4 @@ def main():
     driver.quit()
 
 if __name__ == "__main__":
-    main()
+    Crawling_Naver_data()
