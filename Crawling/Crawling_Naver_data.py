@@ -99,7 +99,7 @@ def Crawling_Naver_data(df):
             get_news_info(driver, url, content_total_dict)
             
     new_df = pd.DataFrame(content_total_dict)
-    new_df.to_csv('Naver_data.csv', index=True, index_label='row_id')
+    new_df.to_csv('D:\GitHub\Data_on_Air\Dataset\Naver_data.csv', index=True, index_label='row_id')
     
     driver.quit()
 
