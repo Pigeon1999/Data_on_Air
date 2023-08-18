@@ -1,12 +1,3 @@
-#!pip install konlpy
-#!pip install tensorflow==2.11
-#!pip install nltk
-#!pip install gensim
-#!pip install --only-binary :all: scikit-learn
-#!git clone https://github.com/ssut/py-hanspell
-#%cd py-hanspell
-#!python setup.py install
-
 import pandas as pd
 import re
 import nltk
