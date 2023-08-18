@@ -111,22 +111,26 @@ def Crawling_SNU_data(start, end):
     # CSV 파일로 저장
     df.to_csv(f'D:\Download\SNU_factcheck_{start}_{end}.csv', index=False) # 프로젝트 직전에 D:\GitHub\Data_on_Air\Dataset\ 링크로 옮기기
     
-def Turn_page(page_num):
-    current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
-    click_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
+def Turn_page(target_page):
+    right_button = dr.find_element(by = By.XPATH, value = '/html/body/div/div/div[2]/div/div[3]/button[7]')
     
-    if page_num > 1 and page_num != current_page:
-        while page_num > int(current_page[1].text):
-            for page in click_page:
-                if int(page.text) == int(current_page[1].text) + 1:
-                    # 웹 스크롤 내리기 : dataframe으로 만들고나서 배치
-                    Scroll_down = dr.execute_script('window.scrollTo(0, 5000)')
-                    time.sleep(2)                 
-                    act.click(page).perform()               
-                    break
-                
-            current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
-            click_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
+    while True:
+        page_list = []
+        current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')[1].text
+        for i in range(2, 7):
+            page_list.append(dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[3]/button[{i}]').text)
+        print(page_list)
+        if str(target_page) != current_page:
+            dr.execute_script('window.scrollTo(0, 5000)')
+            time.sleep(2)   
+            if str(target_page) in page_list:
+                target = page_list.index(str(target_page)) + 2
+                print(target)
+                target_button = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[3]/button[{target}]').click()
+            else:
+                right_button.click()
+        else:
+            break
         
 Crawling_SNU_data(60, 70)
 
