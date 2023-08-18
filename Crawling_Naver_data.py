@@ -76,11 +76,6 @@ def get_news_info(driver, url, data_dict):
     data_dict["상세내용"].append(main_str)
     data_dict["주장/검증매체"].append(press_str)
 
-# CSV로 저장하는 함수
-def save_to_csv(data_dict, filename):
-    df = pd.DataFrame(data_dict)
-    df.to_csv(filename, index=True, index_label='row_data')
-
 # 메인 함수
 def Crawling_Naver_data(df):
     driver = configure_driver()
