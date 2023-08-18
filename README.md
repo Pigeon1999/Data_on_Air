@@ -18,7 +18,7 @@
 - Python 3.10.12
 
 # 설치 방법
-깃허브의 requirements.txt를 사용합니다. 
+해당 리포지드의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/main/requirements.txt)를 사용합니다. 
 
 ```
 !pip install -r requirement.txt
