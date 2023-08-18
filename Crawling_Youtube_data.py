@@ -38,7 +38,7 @@ driver = webdriver.Firefox(options=options)
 class Youtube_Crawling:
     
     def __init__(self, keyword):
-        self.url = 'https://www.youtube.com/results?search_query={}'.format(keyword)
+        self.url = 'https://www.youtube.com/results?search_query={}&sp=CAI%253D'.format(keyword)
 
         self.chrome_options = Options()
         self.chrome_options.add_experimental_option('detach', True) # 브라우저 꺼짐 방지
@@ -64,7 +64,7 @@ class Youtube_Crawling:
 
     def searchKeywords(self):        
         time.sleep(1)
-
+        '''
         self.driver.find_element(by = By.XPATH, value = '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-search/div[1]/div/ytd-search-header-renderer/div[3]/ytd-button-renderer/yt-button-shape/button/yt-touch-feedback-shape/div/div[2]').click()
         
         time.sleep(1)
@@ -72,6 +72,7 @@ class Youtube_Crawling:
         self.driver.find_element(by = By.XPATH, value = '/html/body/ytd-app/ytd-popup-container/tp-yt-paper-dialog/ytd-search-filter-options-dialog-renderer/div[2]/ytd-search-filter-group-renderer[5]/ytd-search-filter-renderer[3]/a/div/yt-formatted-string').click()   
         
         time.sleep(2)
+        '''
         
         data_list = []
         column = ['주제', '내용', '상세내용', '주장/검증매체']
@@ -116,7 +117,6 @@ class Youtube_Crawling:
                 data = ["경제", title, text[:700], claim]
                 
             data_list.append(data)
-            print(data)
             if len(data_list) >= 5:
                 df = pd.DataFrame(data_list, columns = column)
                 break
@@ -128,7 +128,7 @@ def Crawling_Youtube_data(df):
     keyword_list = df['상세내용']
     keyword = []
     for row in keyword_list:
-        row = ast.literal_eval(row) # 문자열의 리스트화
+        #row = ast.literal_eval(row) # 문자열의 리스트화
         frequency_counter = Counter(row)  # 각 요소의 빈도수 계산
         top_n_frequencies = frequency_counter.most_common(3)  # 빈도수 상위 n개 선택
         top_n_elements = [element for element, _ in top_n_frequencies]  # 요소만 추출
@@ -148,6 +148,8 @@ def Crawling_Youtube_data(df):
     
     return new_df
 
+df = pd.read_csv('D:\DownLoad\SNU_factcheck_sample.csv', encoding = 'cp949')
+Crawling_Youtube_data(df)
 
 '''
 [실행코드]
