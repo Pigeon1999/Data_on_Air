@@ -17,8 +17,8 @@
 - colab
 - Python 3.10.12
 
-# 사용 방법 
-깃허브의 requirements.txt를 다운받습니다. 
+# 설치 방법
+깃허브의 requirements.txt를 사용합니다. 
 
 ```
 !pip install -r requirement.txt
