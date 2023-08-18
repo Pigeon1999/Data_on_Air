@@ -23,7 +23,7 @@ dynamic_page = Dynamic_Page()
 dr = dynamic_page.dr
 act = dynamic_page.act
 
-def Crawling_data(start, end):
+def Crawling_SNU_data(start, end):
 
     # 공지사항 지우기
     btn_outline_secondary = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
@@ -128,5 +128,5 @@ def Turn_page(page_num):
             current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
             click_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
         
-Crawling_data(59, 65)
+Crawling_SNU_data(59, 65)
 
