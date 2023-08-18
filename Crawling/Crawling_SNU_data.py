@@ -128,5 +128,5 @@ def Turn_page(page_num):
             current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')
             click_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
         
-Crawling_SNU_data(59, 65)
+Crawling_SNU_data(60, 70)
 
