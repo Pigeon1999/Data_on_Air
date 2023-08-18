@@ -20,10 +20,10 @@
 # 설치 방법
 Repository를 clone합니다. 
 ```
-git clone
+git clone https://github.com/Pigeon1999/Data_on_Air.git
 ```
 
-해당 리포지드의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/main/requirements.txt)를 사용합니다. 
+Repository의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/main/requirements.txt)를 사용합니다. 
 ```
 !pip install -r requirement.txt
 ```
@@ -34,5 +34,6 @@ git clone
 ```
 from Crawling_SNU_data import Crawling_SNU_data
 
+# 경제분야의 페이지를 start부터 end까지 크롤링
 Crawling_SNU_data(start, end)
 ```
