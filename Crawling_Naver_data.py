@@ -1,11 +1,10 @@
-from selenium import webdriver
-from bs4 import BeautifulSoup as bs
-from collections import Counter
-from selenium.webdriver.chrome.options import Options # 브라우저 꺼짐 방지
-import pandas as pd
-import time
-import os
 import ast
+import time
+import pandas as pd
+from selenium import webdriver
+from collections import Counter
+from bs4 import BeautifulSoup as bs
+from selenium.webdriver.chrome.options import Options # 브라우저 꺼짐 방지
 
 '''
 # Selenium 설정
@@ -24,19 +23,6 @@ def configure_driver():
 
     return webdriver.Firefox(options=options)
 '''
-
-class Youtube_Crawling:
-    
-    def __init__(self, keyword):
-        self.url = 'https://www.youtube.com/results?search_query={}&sp=CAMSAhAB'.format(keyword)
-
-        self.chrome_options = Options()
-        self.chrome_options.add_argument("headless")
-        
-        self.driver = webdriver.Chrome(options = self.chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
-        self.driver.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
-        time.sleep(2)
-
 
 # 키워드 빈도수 상위 n개 추출 함수
 def get_top_n_frequencies(input_list, n):
