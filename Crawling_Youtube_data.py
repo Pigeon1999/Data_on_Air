@@ -151,7 +151,7 @@ def Crawling_Youtube_data(df):
 
 '''
 [실행코드]
-crawling_youtube_data()
+crawling_youtube_data(df)
 
 [실행결과]
 탄소중립, 더 나은 하루를 위한 생활 습관 https://www.youtube.com/watch?v=OzwSDV8hNH8&pp=ygUG7YOE7IaM
