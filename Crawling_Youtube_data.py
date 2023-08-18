@@ -124,8 +124,7 @@ class Youtube_Crawling:
         self.driver.close()
         return df
 
-def crawling_youtube_data():
-    df = pd.read_csv("D:\Download\Keyword_data.csv", encoding = 'utf-8')
+def crawling_youtube_data(df):
     keyword_list = df['상세내용']
     keyword = []
     for row in keyword_list:
@@ -146,6 +145,9 @@ def crawling_youtube_data():
     new_df.to_csv('output.csv', index=True, index_label='row_id')
 
     print("데이터가 'output.csv' 파일로 저장되었습니다.") 
+    
+    return new_df
+
 
 '''
 [실행코드]
