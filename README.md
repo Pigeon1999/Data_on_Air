@@ -3,7 +3,7 @@
 상명대학교 빅데이터 분석 기반 금융분야 비즈니스 인사이트 역량제고 과정
 
 # 프로젝트 주제
-금융 분야 페이크 뉴스 탐지시스템 구축
+페이크 뉴스 탐지시스템 구축
 
 # 프로젝트 목표 
 1. 딥러닝을 이용하여 페이크 뉴스 탐지 모델 개발
@@ -36,4 +36,48 @@ from Crawling_SNU_data import Crawling_SNU_data
 
 # 경제분야의 페이지를 start부터 end까지 크롤링
 Crawling_SNU_data(start, end)
+```
+
+#### Crawling_Naver_data.py : 네이버 경제 분야 크롤링 
+```
+from Crawling_Naver_data import Crawling_Naver_data
+
+# 토큰화가 완료된 SNU_keyword_data.csv를 인자로 하여
+# 연관 키워드관련 기사 크롤링
+Crawling_Naver_data(SNU_keyword_data)
+```
+
+#### Crawling_Youtube_data.py : 유튜브 경제 분야 크롤링 
+```
+from Crawling_Youtube_data import Crawling_Youtube_data
+
+# 토큰화가 완료된 SNU_keyword_data.csv를 인자로 하여
+# 연관 키워드관련 영상 크롤링  
+Crawling_Youtube_data(SNU_keyword_data)
+```
+
+### 2. Modeling 
+#### BiLSTM_Modeling.py 
+#### ① preprocessing() : 데이터 셋의 전처리 및 토큰화
+```
+from BiLSTM_Moedeling import preprocessing
+
+# 크롤링한 데이터의 전처리 
+df = preprocessing(SNU_data)
+```
+
+#### ② make_model(df) : 전처리된 데이터로 Word2Vec와 BiLSTM기법 적용하여 모델 생성 
+```
+from BiLSTM_Moedeling import make_model
+
+# 동일한 경로에 'trained_BiLSTM_model'라는 이름의 모델 생성
+make_model(df)
+```
+
+#### ③ predict_model(x_test, y_test) : 생성된 학습 모델로 검증 데이터 예측 
+```
+from BiLSTM_Moedeling import predict_model
+
+# 코드 고정 
+predict_model(pre_process.x_test, pre_process.y_test)
 ```
