@@ -119,13 +119,11 @@ def Turn_page(target_page):
         current_page = dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-secondary')[1].text
         for i in range(2, 7):
             page_list.append(dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[3]/button[{i}]').text)
-        print(page_list)
         if str(target_page) != current_page:
             dr.execute_script('window.scrollTo(0, 5000)')
             time.sleep(2)   
             if str(target_page) in page_list:
                 target = page_list.index(str(target_page)) + 2
-                print(target)
                 target_button = dr.find_element(by = By.XPATH, value = f'/html/body/div/div/div[2]/div/div[3]/button[{target}]').click()
             else:
                 right_button.click()
