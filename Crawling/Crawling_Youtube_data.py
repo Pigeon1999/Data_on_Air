@@ -128,7 +128,7 @@ def Crawling_Youtube_data(df):
     
     return new_df
 
-df = pd.read_csv('D:\DownLoad\SNU_factcheck_keyword_sample.csv', encoding = 'utf-8')
+df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'utf-8')
 Crawling_Youtube_data(df)
 
 '''
