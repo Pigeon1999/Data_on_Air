@@ -10,10 +10,8 @@
 import pandas as pd
 import re
 import nltk
-import os
 import numpy as np
 import tensorflow as tf
-import ast
 import random
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -206,54 +204,54 @@ class token(pre_process):
 
     #
     def topic_modeling(self):
-      new_df = self.df['빈도순'].copy()  # .copy() 메서드를 사용하여 복사본 생성
-      for row in range(0, len(new_df)):
-          frequency_counter = Counter(new_df[row])
-          top_n_frequencies = frequency_counter.most_common(10)
-          new_df[row] = [element for element, _ in top_n_frequencies]
+        new_df = self.df['빈도순'].copy()  # .copy() 메서드를 사용하여 복사본 생성
+        for row in range(0, len(new_df)):
+            frequency_counter = Counter(new_df[row])
+            top_n_frequencies = frequency_counter.most_common(10)
+            new_df[row] = [element for element, _ in top_n_frequencies]
 
-      data = new_df.tolist()
-      self.df['group_id'] = None
+        data = new_df.tolist()
+        self.df['group_id'] = None
 
-      # 중복 텍스트 묶기
-      text_groups = []
+        # 중복 텍스트 묶기
+        text_groups = []
 
-      # 중복 텍스트를 그룹에 묶는 함수
-      for i in range(0, len(self.df)):
-        if data[i] != []:
-          group = []
-          # 각행마다 유사도 비교
-          for row in range(0, len(data)):
-            if data[i] != data[row]:
-              count = 0
-              for j in range(0, 10):
-                try:
-                  if data[i][j] in data[row]:
-                      count = count + 1
-                      if count >= 4: # n개의 키워드가 같을시 유사한 주제로 판단.
-                          group.append(row)  # 인덱스를 추가
-                          data[row] = []
-                          count = 0
-                          break  # 더이상 반복할 필요 없음
-                except:
-                  continue
+        # 중복 텍스트를 그룹에 묶는 함수
+        for i in range(0, len(self.df)):
+            if data[i] != []:
+                group = []
+                # 각행마다 유사도 비교
+                for row in range(0, len(data)):
+                    if data[i] != data[row]:
+                        count = 0
+                        for j in range(0, 10):
+                            try:
+                                if data[i][j] in data[row]:
+                                    count = count + 1
+                                    if count >= 4: # n개의 키워드가 같을시 유사한 주제로 판단.
+                                        group.append(row)  # 인덱스를 추가
+                                        data[row] = []
+                                        count = 0
+                                        break  # 더이상 반복할 필요 없음
+                            except:
+                                continue
 
-          group.append(i)
-          data[i] = []
+                group.append(i)
+                data[i] = []
 
-          for idx in group:
-            df.loc[self.df.index == idx, 'group_id'] = i
+                for idx in group:
+                    self.df.loc[self.df.index == idx, 'group_id'] = i
 
-          text_groups.append(group)
+                text_groups.append(group)
 
-      # 중복된 group_id를 가진 데이터 중 랜덤하게 하나만 남기고 나머지 삭제
-      for group in text_groups:
-          if group:
-              rows_to_keep = random.choice(group)
-              group.remove(rows_to_keep)
-              self.df.drop(group, inplace=True)
+        # 중복된 group_id를 가진 데이터 중 랜덤하게 하나만 남기고 나머지 삭제
+        for group in text_groups:
+            if group:
+                rows_to_keep = random.choice(group)
+                group.remove(rows_to_keep)
+                self.df.drop(group, inplace=True)
         
-      return self.df
+        return self.df
 
 # 4. 워드 임베딩 
 class Word_Embedding(pre_process):      
@@ -380,6 +378,10 @@ def predict_model(x_test, y_test):
                 correct_data = correct_data + 1
     print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
     print(f'{correct_data/len(y_test) * 100:.2f}%')
+
+csv = pd.read_csv("D:\Download\SNU_factcheck_sample.csv", encoding = 'cp949')
+df = preprocessing(csv)
+print(df)
 
 ''' 
 <1. preprocessig 함수>
