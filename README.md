@@ -18,8 +18,21 @@
 - Python 3.10.12
 
 # 설치 방법
-해당 리포지드의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/main/requirements.txt)를 사용합니다. 
+Repository를 clone합니다. 
+```
+git clone
+```
 
+해당 리포지드의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/main/requirements.txt)를 사용합니다. 
 ```
 !pip install -r requirement.txt
+```
+
+# 사용 방법
+### 1. Crawling 
+#### Crawling_SNU_data.py : snu_factcheck 사이트 경제 분야 크롤링 
+```
+from Crawling_SNU_data import Crawling_SNU_data
+
+Crawling_SNU_data(start, end)
 ```
