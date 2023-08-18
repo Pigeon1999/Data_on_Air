@@ -13,6 +13,8 @@ import nltk
 import os
 import numpy as np
 import tensorflow as tf
+import ast
+import random
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk import sent_tokenize
@@ -28,6 +30,9 @@ from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dense
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 nltk.download('punkt')
 
 # 초기 설정
@@ -178,14 +183,17 @@ class token(pre_process):
             most_common_word = word_counts.most_common(1)[0][0]
 
         temp_data = []
+        most_common_words_data = []
         for text in self.df['상세내용']:
             word_counts = Counter(text)
             most_common_words = word_counts.most_common()
 
-            most_common_words_only = [word for word, count in most_common_words if count > 0] # 20230816 나중에 수정하세요
+            most_common_words_only = [word for word, count in most_common_words if count > 2] # 20230816 나중에 수정하세요
             temp_data.append(len(most_common_words_only))
-
+            most_common_words_data.append(most_common_words_only)
+            
         self.df['temp'] = temp_data
+        self.df['빈도순'] = most_common_words_data
 
         for row in range(0, len(self.df), 1):
             temp = self.df['temp']
@@ -194,13 +202,64 @@ class token(pre_process):
 
         del self.df['temp']
 
-        return self.df
+        return self.topic_modeling()
+
+    #
+    def topic_modeling(self):
+      new_df = self.df['빈도순'].copy()  # .copy() 메서드를 사용하여 복사본 생성
+      for row in range(0, len(new_df)):
+          frequency_counter = Counter(new_df[row])
+          top_n_frequencies = frequency_counter.most_common(10)
+          new_df[row] = [element for element, _ in top_n_frequencies]
+
+      data = new_df.tolist()
+      self.df['group_id'] = None
+
+      # 중복 텍스트 묶기
+      text_groups = []
+
+      # 중복 텍스트를 그룹에 묶는 함수
+      for i in range(0, len(self.df)):
+        if data[i] != []:
+          group = []
+          # 각행마다 유사도 비교
+          for row in range(0, len(data)):
+            if data[i] != data[row]:
+              count = 0
+              for j in range(0, 10):
+                try:
+                  if data[i][j] in data[row]:
+                      count = count + 1
+                      if count >= 4: # n개의 키워드가 같을시 유사한 주제로 판단.
+                          group.append(row)  # 인덱스를 추가
+                          data[row] = []
+                          count = 0
+                          break  # 더이상 반복할 필요 없음
+                except:
+                  continue
+
+          group.append(i)
+          data[i] = []
+
+          for idx in group:
+            df.loc[self.df.index == idx, 'group_id'] = i
+
+          text_groups.append(group)
+
+      # 중복된 group_id를 가진 데이터 중 랜덤하게 하나만 남기고 나머지 삭제
+      for group in text_groups:
+          if group:
+              rows_to_keep = random.choice(group)
+              group.remove(rows_to_keep)
+              self.df.drop(group, inplace=True)
+        
+      return self.df
 
 # 4. 워드 임베딩 
 class Word_Embedding(pre_process):      
     def word_embedding(self):
         # Word2Vec 모델로 학습된 임베딩 벡터 가져오기
-        model = Word2Vec(sentences = self.df['상세내용'], vector_size = 100, window = 5, min_count = 3, workers = 4, sg = 0)
+        model = Word2Vec(sentences = self.df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
         embedding_matrix = model.wv.vectors
         pre_process.vocab_size, pre_process.embedding_dim = embedding_matrix.shape
 
@@ -292,6 +351,24 @@ def predict_model(x_test, y_test):
     loaded_model = load_model('trained_BiLSTM_model')  
     correct_data = 0
     score = loaded_model.predict(x_test) # 예측
+
+    # 정밀도ㅡ재현율-F1-Score 계산 초기식
+    predicted_labels = loaded_model.predict(pre_process.x_test)
+    predicted_labels = np.argmax(predicted_labels, axis=1)
+    true_labels = pre_process.y_test
+
+    # 정밀도
+    precision = precision_score(true_labels, predicted_labels, average='weighted')
+    print("정밀도 테스트: {}".format(precision))
+
+    # 재현율
+    recall = recall_score(true_labels, predicted_labels, average='weighted')
+    print("재현율 테스트: {}".format(recall))
+
+    # F1 스코어 계산
+    f1 = f1_score(true_labels, predicted_labels, average='weighted')
+    print("F1 테스트: {}".format(f1))
+
     for i in range(0, len(x_test)):
         if(score[i][1] > 0.5):
             print(f"{score[i][1] * 100:.2f}% 확률로 참입니다. <실제 판단 여부 : {y_test[i]}>")
@@ -303,11 +380,6 @@ def predict_model(x_test, y_test):
                 correct_data = correct_data + 1
     print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
     print(f'{correct_data/len(y_test) * 100:.2f}%')
-
-csv = pd.read_csv("D:\Download\SNU_factcheck_20230816.csv", encoding = 'cp949')
-df = preprocessing(csv)
-make_model(df)
-predict_model(pre_process.x_test, pre_process.y_test)
 
 ''' 
 <1. preprocessig 함수>
