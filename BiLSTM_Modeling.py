@@ -4,6 +4,7 @@ import nltk
 import numpy as np
 import tensorflow as tf
 import random
+import csv
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk import sent_tokenize
@@ -22,8 +23,6 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
-from Crawling_Naver_data import Crawling_Naver_data
-from Crawling_Youtube_data import Crawling_Youtube_data
 nltk.download('punkt')
 
 # 초기 설정
@@ -373,12 +372,10 @@ def predict_model(x_test, y_test):
     print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
-csv = pd.read_csv("D:\Download\SNU_factcheck_sample.csv", encoding = 'cp949')
-df = preprocessing(csv)
-Naver_df = Crawling_Naver_data(df)
-Youtube_df = Crawling_Youtube_data(df)
-print(Naver_df)
-print(Youtube_df)
+df = pd.read_csv("D:\Download\SNU_factcheck_sample.csv", encoding = 'cp949')
+df = preprocessing(df)
+print(df)
+df.to_csv("D:\Download\SNU_factcheck_keyword_sample.csv")
 
 ''' 
 <1. preprocessig 함수>
