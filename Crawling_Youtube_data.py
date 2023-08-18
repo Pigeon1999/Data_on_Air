@@ -12,10 +12,7 @@ from bs4 import BeautifulSoup as bs
 from youtube_transcript_api import YouTubeTranscriptApi
 import pandas as pd
 import time
-import re
-import os
 import ast
-import csv
 from collections import Counter
 
 '''
