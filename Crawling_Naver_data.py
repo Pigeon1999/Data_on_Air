@@ -109,4 +109,4 @@ def Crawling_Naver_data():
     return new_df
 
 if __name__ == "__main__":
-    Crawling_Naver_data()
+    Naver_df = Crawling_Naver_data()
