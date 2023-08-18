@@ -82,16 +82,14 @@ def save_to_csv(data_dict, filename):
     df.to_csv(filename, index=True, index_label='row_data')
 
 # 메인 함수
-def Crawling_Naver_data():
+def Crawling_Naver_data(df):
     driver = configure_driver()
-    
-    df_snu = pd.read_csv('./csv/snu.csv', encoding='utf-8')
     content_total_dict = {'주제': [], '내용': [], '상세내용': [], '주장/검증매체': []}
 
     top_keywords = 3
     news_per_keyword = 5
 
-    for i in df_snu['상세내용']:
+    for i in df['상세내용']:
         temp = ast.literal_eval(i)
         keyword_list = get_top_n_frequencies(temp, top_keywords)
         combine = ', '.join(keyword_list)
@@ -109,4 +107,4 @@ def Crawling_Naver_data():
     return new_df
 
 # [실행코드]
-# Naver_df = Crawling_Naver_data()
+# Naver_df = Crawling_Naver_data(df)
