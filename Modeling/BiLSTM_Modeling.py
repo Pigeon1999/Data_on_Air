@@ -51,7 +51,6 @@ class label(pre_process):
         self.df['label'] = self.df['label'].replace({'전혀 사실 아님': 0, '대체로 사실 아님': 0, '절반의 사실': 0, '대체로 사실': 1, '사실': 1})
 
         self.df['row_id'] = range(0, len(self.df))
-        self.df.index = self.df['row_id']
         self.df['row_id'] = self.df['row_id'].astype(int)
         self.df['label'] = self.df['label'].astype(int)
 
