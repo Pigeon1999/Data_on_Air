@@ -340,9 +340,9 @@ def preprocessing(csv, num):
     if num == 0:
         df.to_csv('D:\GitHub\Data_on_Air\Dataset\SNU_keyword_data.csv')
     elif num == 1:
-        df.to_csv('D:\GitHub\Data_on_Air\Dataset\Naver_keyword_data.csv')
+        df.to_csv('D:/GitHub/Data_on_Air/Dataset/Naver_keyword_data.csv')
     elif num == 2:
-        df.to_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_keyword_data.csv')
+        df.to_csv('D:/GitHub/Data_on_Air/Dataset/Youtube_keyword_data.csv')
     else:
         pass
 
