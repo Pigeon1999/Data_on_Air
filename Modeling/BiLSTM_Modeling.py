@@ -51,6 +51,7 @@ class label(pre_process):
         self.df['label'] = self.df['label'].replace({'전혀 사실 아님': 0, '대체로 사실 아님': 0, '절반의 사실': 0, '대체로 사실': 1, '사실': 1})
 
         self.df['row_id'] = range(0, len(self.df))
+        self.df.index = self.df['row_id']
         self.df['row_id'] = self.df['row_id'].astype(int)
         self.df['label'] = self.df['label'].astype(int)
 
@@ -177,24 +178,23 @@ class token(pre_process):
             word_counts = Counter(text)
             most_common_words = word_counts.most_common()
 
-            most_common_words_only = [word for word, count in most_common_words if count > 2] # 20230816 나중에 수정하세요
+            most_common_words_only = [word for word, count in most_common_words if count > 2]
             temp_data.append(len(most_common_words_only))
             most_common_words_data.append(most_common_words_only)
-            
+
         self.df['temp'] = temp_data
         self.df['빈도순'] = most_common_words_data
 
-        try:
-            for row in range(0, len(self.df)):
-                temp = self.df['temp']
-                if int(temp[row]) == 0:
-                    self.df.drop(row, inplace = True)
-        except:
-            self.token_processing()
-        
+
+        for row in range(0, len(self.df)):
+            temp = self.df['temp']
+            if int(temp[row]) == 0:
+                self.df.drop(row, inplace = True)
+
         del self.df['temp']
         self.df['row_id'] = range(0, len(self.df))
-
+        self.df.index = self.df['row_id']
+        
         return self.topic_modeling()
 
     #
@@ -245,6 +245,12 @@ class token(pre_process):
                 rows_to_keep = random.choice(group)
                 group.remove(rows_to_keep)
                 self.df.drop(group, inplace=True)
+        
+        del self.df['빈도순']
+        del self.df['group_id']
+        
+        self.df['row_id'] = range(0, len(self.df))
+        self.df.index = self.df['row_id']
         
         return self.df
 
@@ -321,7 +327,7 @@ class BiLSTM(pre_process):
 def preprocessing(csv):
     Pre_process = pre_process(csv)
     df = Pre_process.df
-    
+
     Label = label(df)
     df = Label.label_processing() # 1. 주제 없애고 label까지 처리  
 
@@ -330,7 +336,9 @@ def preprocessing(csv):
 
     Token = token(df)
     df = Token.token_processing() # 3. 토큰화
-            
+
+    df.to_csv('D:\GitHub\Data_on_Air\Dataset\SNU_keyword_data.csv')
+
     return df
 
 def make_model(df):
@@ -374,10 +382,10 @@ def predict_model(x_test, y_test):
     print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
-df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv' , encoding = 'cp949', index_col = 0)[:50]
+
+df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')[:50]
 df = preprocessing(df)
 print(df)
-
 
 ''' 
 <1. preprocessig 함수>
