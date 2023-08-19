@@ -128,8 +128,8 @@ def Crawling_Youtube_data(df):
     
     return new_df
 
-df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'utf-8')
-Crawling_Youtube_data(df)
+#df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'utf-8')
+#Crawling_Youtube_data(df)
 
 '''
 [실행코드]
