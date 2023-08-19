@@ -324,7 +324,7 @@ class BiLSTM(pre_process):
         loaded_model = load_model('trained_BiLSTM_model')   
         print("테스트 정확도: %.4f" % (loaded_model.evaluate(pre_process.x_test, pre_process.y_test)[1]))
     
-def preprocessing(csv):
+def preprocessing(csv, num):
     Pre_process = pre_process(csv)
     df = Pre_process.df
 
@@ -337,7 +337,14 @@ def preprocessing(csv):
     Token = token(df)
     df = Token.token_processing() # 3. 토큰화
 
-    df.to_csv('D:\GitHub\Data_on_Air\Dataset\SNU_keyword_data.csv')
+    if num == 0:
+        df.to_csv('D:\GitHub\Data_on_Air\Dataset\SNU_keyword_data.csv')
+    elif num == 1:
+        df.to_csv('D:\GitHub\Data_on_Air\Dataset\Naver_keyword_data.csv')
+    elif num == 2:
+        df.to_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_keyword_data.csv')
+    else:
+        pass
 
     return df
 
@@ -384,7 +391,7 @@ def predict_model(x_test, y_test):
 
 
 df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')
-df = preprocessing(df)
+df = preprocessing(df, 0)
 print(df)
 
 ''' 
