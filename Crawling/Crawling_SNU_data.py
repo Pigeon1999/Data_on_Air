@@ -130,5 +130,5 @@ def Turn_page(target_page):
         else:
             break
         
-Crawling_SNU_data(60, 70)
+Crawling_SNU_data(77, 80)
 
