@@ -184,12 +184,16 @@ class token(pre_process):
         self.df['temp'] = temp_data
         self.df['빈도순'] = most_common_words_data
 
-        for row in range(0, len(self.df), 1):
-            temp = self.df['temp']
-            if int(temp[row]) == 0:
-                self.df.drop(row, inplace = True)
-
+        try:
+            for row in range(0, len(self.df)):
+                temp = self.df['temp']
+                if int(temp[row]) == 0:
+                    self.df.drop(row, inplace = True)
+        except:
+            self.token_processing(self.df)
+        
         del self.df['temp']
+        self.df['row_id'] = range(0, len(self.df))
 
         return self.topic_modeling()
 
