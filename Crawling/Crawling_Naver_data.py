@@ -106,5 +106,5 @@ def Crawling_Naver_data(df):
     return new_df
 
 # [실행코드]
-df = pd.read_csv('D:\DownLoad\SNU_factcheck_keyword_sample.csv', encoding = 'utf-8')
-Naver_df = Crawling_Naver_data(df)
+#df = pd.read_csv('D:\DownLoad\SNU_factcheck_keyword_sample.csv', encoding = 'utf-8')
+#Naver_df = Crawling_Naver_data(df)
