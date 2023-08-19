@@ -373,11 +373,6 @@ def predict_model(x_test, y_test):
     print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
-df = pd.read_csv("D:\Download\SNU_factcheck_sample.csv", encoding = 'cp949')
-df = preprocessing(df)
-print(df)
-#df.to_csv("D:\Download\SNU_factcheck_keyword_sample.csv")
-
 ''' 
 <1. preprocessig 함수>
 csv = pd.read_csv('파일 주소', encoding = 'cp949')
