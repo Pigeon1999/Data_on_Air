@@ -190,7 +190,7 @@ class token(pre_process):
                 if int(temp[row]) == 0:
                     self.df.drop(row, inplace = True)
         except:
-            self.token_processing(self.df)
+            self.token_processing()
         
         del self.df['temp']
         self.df['row_id'] = range(0, len(self.df))
@@ -330,8 +330,6 @@ def preprocessing(csv):
 
     Token = token(df)
     df = Token.token_processing() # 3. 토큰화
-
-    df.to_csv('D:\GitHub\Data_on_Air\Dataset\SNU_keyword_data.csv')
             
     return df
 
@@ -375,6 +373,11 @@ def predict_model(x_test, y_test):
                 correct_data = correct_data + 1
     print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
     print(f'{correct_data/len(y_test) * 100:.2f}%')
+
+df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv' , encoding = 'cp949', index_col = 0)[:50]
+df = preprocessing(df)
+print(df)
+
 
 ''' 
 <1. preprocessig 함수>
