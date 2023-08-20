@@ -33,7 +33,7 @@ Repository의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/
 ### 1. Crawling 
 #### Crawling_SNU_data.py : snu_factcheck 사이트 경제 분야 크롤링 
 ```
-from Crawling_SNU_data import Crawling_SNU_data
+from Data_on_Air.Modeling.Crawling_SNU_data import Crawling_SNU_data
 
 # 경제분야의 페이지를 start부터 end까지 크롤링
 Crawling_SNU_data(start, end)
@@ -41,7 +41,7 @@ Crawling_SNU_data(start, end)
 
 #### Crawling_Naver_data.py : 네이버 경제 분야 크롤링 
 ```
-from Crawling_Naver_data import Crawling_Naver_data
+from Data_on_Air.Modeling.Crawling_Naver_data import Crawling_Naver_data
 
 # 토큰화가 완료된 SNU_keyword_data.csv를 인자로 하여
 # 연관 키워드관련 기사 크롤링
@@ -50,7 +50,7 @@ Crawling_Naver_data(SNU_keyword_data)
 
 #### Crawling_Youtube_data.py : 유튜브 경제 분야 크롤링 
 ```
-from Data_on_Air.Modeling.BiLSTM_Modeling import Crawling_Youtube_data
+from Data_on_Air.Modeling.Crawling_Youtube_data import Crawling_Youtube_data
 
 # 토큰화가 완료된 SNU_keyword_data.csv를 인자로 하여
 # 연관 키워드관련 영상 크롤링  
@@ -63,8 +63,8 @@ Crawling_Youtube_data(SNU_keyword_data)
 ```
 from Data_on_Air.Modeling.BiLSTM_Modeling import preprocessing
 
-# 크롤링한 데이터의 전처리 
-df = preprocessing(SNU_data)
+# 크롤링한 데이터의 전처리 (0번 : snu_keyword. 1번 : naver_keyword, 2번 : youtube_keyword)
+df = preprocessing(SNU_data, num)
 ```
 
 #### ② make_model(df) : 전처리된 데이터로 Word2Vec와 BiLSTM기법 적용하여 모델 생성 
@@ -77,7 +77,7 @@ make_model(df)
 
 #### ③ predict_model(x_test, y_test) : 생성된 학습 모델로 검증 데이터 예측 
 ```
-from BiLSTM_Moedeling import predict_model
+from Data_on_Air.Modeling.BiLSTM_Modeling import predict_model
 
 # 코드 고정 
 predict_model(pre_process.x_test, pre_process.y_test)
