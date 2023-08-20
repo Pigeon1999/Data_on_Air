@@ -337,13 +337,13 @@ def preprocessing(csv, num):
     df = Token.token_processing() # 3. 토큰화
   
     if num == 0:
-        df.to_csv('D:\GitHub\Data_on_Air\Dataset\SNU_keyword_data.csv', index = False)
+        df.to_csv('SNU_keyword_data.csv', index = False)
     elif num == 1:
-        df.to_csv('D:/GitHub/Data_on_Air/Dataset/Naver_keyword_data.csv', index = False)
+        df.to_csv('Naver_keyword_data.csv', index = False)
     elif num == 2:
-        df.to_csv('D:/GitHub/Data_on_Air/Dataset/Youtube_keyword_data.csv', index = False)
+        df.to_csv('Youtube_keyword_data.csv', index = False)
     else:
-        df.to_csv('D:/DownLoad/sample_data.csv', index = False)
+        df.to_csv('sample_data.csv', index = False)
     
     
     return df
@@ -390,9 +390,9 @@ def predict_model(x_test, y_test):
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
 
-df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')[:10]
-df = preprocessing(df, 5)
-print(df)
+#df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')[:10]
+#df = preprocessing(df, 5)
+#print(df)
 
 ''' 
 <1. preprocessig 함수>
