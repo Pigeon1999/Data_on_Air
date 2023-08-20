@@ -83,13 +83,10 @@ def Crawling_Naver_data(df):
     chrome_options = Options()
     chrome_options.add_argument("headless")
     
-    try:
-        dr = webdriver.Chrome(options = chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
-    except:
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        dr = webdriver.Chrome(options = chrome_options)
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    dr = webdriver.Chrome(options = chrome_options)
     content_total_dict = {'주제': [], '내용': [], '상세내용': [], '주장/검증매체': []}
 
     top_keywords = 3
