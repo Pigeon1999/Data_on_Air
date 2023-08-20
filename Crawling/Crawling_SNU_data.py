@@ -25,7 +25,7 @@ class Dynamic_Page:
 
         self.act = ActionChains(self.dr)  # 드라이버에 동작을 실행시키는 명령어를 act로 지정
 
-    def Crawling_SNU_data(self, start, end):
+    def Crawling_data(self, start, end):
 
         # 공지사항 지우기
         btn_outline_secondary = self.dr.find_elements(by = By.CSS_SELECTOR, value = '.btn-outline-secondary')
@@ -111,7 +111,8 @@ class Dynamic_Page:
         print(df)
         
         # CSV 파일로 저장
-        df.to_csv(f'D:\Download\SNU_factcheck_{start}_{end}.csv', index=False) # 프로젝트 직전에 D:\GitHub\Data_on_Air\Dataset\ 링크로 옮기기
+        df.to_csv('SNU_data.csv', index=False) # 프로젝트 직전에 D:\GitHub\Data_on_Air\Dataset\ 링크로 옮기기
+        print('SNU_data.csv를 생성하였습니다.')
     
     def Turn_page(self, target_page):
         right_button = self.dr.find_element(by = By.XPATH, value = '/html/body/div/div/div[2]/div/div[3]/button[7]')
@@ -132,5 +133,7 @@ class Dynamic_Page:
             else:
                 break
         
-#Crawling_SNU_data(77, 80)
+def Crawling_SNU_data(start, end):
+    dynamic_page = Dynamic_Page()
+    dynamic_page.Crawling_data(start, end)
 
