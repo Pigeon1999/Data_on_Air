@@ -33,11 +33,8 @@ Repository의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/
 
 # 사용 방법
 ### 1. Crawling 
-#### 실행 시간이 오래 걸려 Colab에서 실행하는 것을 추천 하지 않습니다. 만약 Colab에서 실행한다면 해당 코드를 실행하십시오.
-```
-!apt-get update
-!apt install chromium-chromedriver
-```
+#### 실행 시간이 오래 걸려 Colab에서 실행하는 것을 추천 하지 않습니다. 
+
 #### Crawling_SNU_data.py : snu_factcheck 사이트 경제 분야 크롤링 
 ```
 from Data_on_Air.Modeling.Crawling_SNU_data import Crawling_SNU_data
