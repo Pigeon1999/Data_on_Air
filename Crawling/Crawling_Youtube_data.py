@@ -42,6 +42,7 @@ class Youtube_Crawling:
         self.chrome_options.add_argument('--no-sandbox')
         self.chrome_options.add_argument('--disable-dev-shm-usage')
         self.dr = webdriver.Chrome(options = self.chrome_options)
+
         self.driver.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
         time.sleep(2)
     
