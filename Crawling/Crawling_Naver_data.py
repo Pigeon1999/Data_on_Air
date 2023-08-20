@@ -81,6 +81,9 @@ def get_news_info(driver, url, data_dict):
 # 메인 함수
 def Crawling_Naver_data(df):
     chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument("headless")
     driver = webdriver.Chrome(options = chrome_options)
     content_total_dict = {'주제': [], '내용': [], '상세내용': [], '주장/검증매체': []}
