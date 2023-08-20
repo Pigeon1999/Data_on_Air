@@ -36,15 +36,15 @@ class Youtube_Crawling:
         self.url = 'https://www.youtube.com/results?search_query={}&sp=CAMSAhAB'.format(keyword)
 
         self.chrome_options = Options()
+        self.chrome_options.add_argument("headless")
+        
         try:
-            pass
+            self.dr = webdriver.Chrome(options = self.chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
         except:
             self.chrome_options.add_argument('--headless')
             self.chrome_options.add_argument('--no-sandbox')
             self.chrome_options.add_argument('--disable-dev-shm-usage')
-        self.chrome_options.add_argument("headless")
-        
-        self.driver = webdriver.Chrome(options = self.chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
+            self.dr = webdriver.Chrome(options = self.chrome_options)
         self.driver.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
         time.sleep(2)
     
