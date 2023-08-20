@@ -19,7 +19,7 @@ class Dynamic_Page:
         try:
             self.dr = webdriver.Chrome(options = self.chrome_options)
         except:
-            self.dr = webdriver.Chrome('chromedriver', options = self.chrome_options)
+            self.dr = webdriver.Chrome('/content/chromedriver', options = self.chrome_options)
         self.dr.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
         time.sleep(4)
 
