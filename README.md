@@ -14,6 +14,7 @@
 - 프로젝트 : 2023.07.25 ~ 2023.08.31 (6주)
 
 # 개발 환경 
+#### 이 프로젝트는 해당 환경에서 개발 되었습니다.
 - colab
 - Python 3.10.12
 
@@ -49,7 +50,7 @@ Crawling_Naver_data(SNU_keyword_data)
 
 #### Crawling_Youtube_data.py : 유튜브 경제 분야 크롤링 
 ```
-from Crawling_Youtube_data import Crawling_Youtube_data
+from Data_on_Air.Modeling.BiLSTM_Modeling import Crawling_Youtube_data
 
 # 토큰화가 완료된 SNU_keyword_data.csv를 인자로 하여
 # 연관 키워드관련 영상 크롤링  
@@ -60,7 +61,7 @@ Crawling_Youtube_data(SNU_keyword_data)
 #### BiLSTM_Modeling.py 
 #### ① preprocessing() : 데이터 셋의 전처리 및 토큰화
 ```
-from BiLSTM_Moedeling import preprocessing
+from Data_on_Air.Modeling.BiLSTM_Modeling import preprocessing
 
 # 크롤링한 데이터의 전처리 
 df = preprocessing(SNU_data)
@@ -68,7 +69,7 @@ df = preprocessing(SNU_data)
 
 #### ② make_model(df) : 전처리된 데이터로 Word2Vec와 BiLSTM기법 적용하여 모델 생성 
 ```
-from BiLSTM_Moedeling import make_model
+from Data_on_Air.Modeling.BiLSTM_Modeling import make_model
 
 # 동일한 경로에 'trained_BiLSTM_model'라는 이름의 모델 생성
 make_model(df)
