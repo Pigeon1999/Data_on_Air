@@ -49,9 +49,8 @@ class label(pre_process):
         self.df = self.df.drop(idx, axis=0)
         self.df= self.df.drop(columns=['주제'])
         self.df['label'] = self.df['label'].replace({'전혀 사실 아님': 0, '대체로 사실 아님': 0, '절반의 사실': 0, '대체로 사실': 1, '사실': 1})
-
+        
         self.df['row_id'] = range(0, len(self.df))
-        self.df.index = self.df['row_id']
         self.df['row_id'] = self.df['row_id'].astype(int)
         self.df['label'] = self.df['label'].astype(int)
 
@@ -336,16 +335,17 @@ def preprocessing(csv, num):
 
     Token = token(df)
     df = Token.token_processing() # 3. 토큰화
-
+  
     if num == 0:
-        df.to_csv('D:\GitHub\Data_on_Air\Dataset\SNU_keyword_data.csv')
+        df.to_csv('D:\GitHub\Data_on_Air\Dataset\SNU_keyword_data.csv', index = False)
     elif num == 1:
-        df.to_csv('D:/GitHub/Data_on_Air/Dataset/Naver_keyword_data.csv')
+        df.to_csv('D:/GitHub/Data_on_Air/Dataset/Naver_keyword_data.csv', index = False)
     elif num == 2:
-        df.to_csv('D:/GitHub/Data_on_Air/Dataset/Youtube_keyword_data.csv')
+        df.to_csv('D:/GitHub/Data_on_Air/Dataset/Youtube_keyword_data.csv', index = False)
     else:
-        pass
-
+        df.to_csv('D:/DownLoad/sample_data.csv', index = False)
+    
+    
     return df
 
 def make_model(df):
@@ -390,9 +390,9 @@ def predict_model(x_test, y_test):
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
 
-#df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')
-#df = preprocessing(df, 0)
-#print(df)
+df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')[:10]
+df = preprocessing(df, 5)
+print(df)
 
 ''' 
 <1. preprocessig 함수>
