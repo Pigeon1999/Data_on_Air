@@ -11,6 +11,12 @@ class Dynamic_Page:
         self.url = 'https://factcheck.snu.ac.kr/?topic_id=2'
 
         self.chrome_options = Options()
+        try:
+            pass
+        except:
+            self.chrome_options.add_argument('--headless')
+            self.chrome_options.add_argument('--no-sandbox')
+            self.chrome_options.add_argument('--disable-dev-shm-usage')
         self.chrome_options.add_experimental_option('detach', True) # 브라우저 꺼짐 방지
 
         self.dr = webdriver.Chrome(options = self.chrome_options)  # 크롬 드라이버를 실행하는 명령어를 dr로 지정
