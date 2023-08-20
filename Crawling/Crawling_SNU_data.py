@@ -16,10 +16,8 @@ class Dynamic_Page:
         self.chrome_options.add_argument('--headless')
         self.chrome_options.add_argument('--no-sandbox')
         self.chrome_options.add_argument('--disable-dev-shm-usage')
-        try:
-            self.dr = webdriver.Chrome(options = self.chrome_options)
-        except:
-            self.dr = webdriver.Chrome('/content/chromedriver', options = self.chrome_options)
+        self.dr = webdriver.Chrome('chromedriver', options = self.chrome_options)
+
         self.dr.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
         time.sleep(4)
 
@@ -137,3 +135,4 @@ def Crawling_SNU_data(start, end):
     dynamic_page = Dynamic_Page()
     dynamic_page.Crawling_data(start, end)
 
+#Crawling_SNU_data(1, 5)
