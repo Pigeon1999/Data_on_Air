@@ -1,5 +1,6 @@
 
 import re
+import ast
 import nltk
 import random
 import numpy as np
@@ -259,47 +260,56 @@ class token(pre_process):
 # 4. 워드 임베딩 
 class Word_Embedding(pre_process):      
     def word_embedding(self):
-        # Word2Vec 모델로 학습된 임베딩 벡터 가져오기
-        model = Word2Vec(sentences = self.df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
-        embedding_matrix = model.wv.vectors
-        pre_process.vocab_size, pre_process.embedding_dim = embedding_matrix.shape
+        try:
+            # Word2Vec 모델로 학습된 임베딩 벡터 가져오기
+            model = Word2Vec(sentences = self.df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
+            embedding_matrix = model.wv.vectors
+            pre_process.vocab_size, pre_process.embedding_dim = embedding_matrix.shape
 
-        x = self.df['상세내용']
-        y = self.df['label']
+            x = self.df['상세내용']
+            y = self.df['label']
 
-        pre_process.x_train, pre_process.x_test, pre_process.y_train, pre_process.y_test = train_test_split(x, y, test_size=0.2, stratify=y, random_state=42)
-        print(f'TF갯수 : {int(len(pre_process.y_train) / 2)}개씩.. 1:1비율')
+            pre_process.x_train, pre_process.x_test, pre_process.y_train, pre_process.y_test = train_test_split(x, y, test_size=0.2, stratify=y, random_state=42)
+            print(f'TF갯수 : {int(len(pre_process.y_train) / 2)}개씩.. 1:1비율')
 
-        # 정수 인코딩
-        tokenizer = Tokenizer(pre_process.vocab_size, oov_token = 'OOV')
-        tokenizer.fit_on_texts(pre_process.x_train)
-        pre_process.x_train = tokenizer.texts_to_sequences(pre_process.x_train)
-        pre_process.x_test = tokenizer.texts_to_sequences(pre_process.x_test)
-        
-        # 패딩 : 샘플들의 길이를 동일하게 맞춰줌
-        print('리뷰의 최대 길이 :',max(len(review) for review in pre_process.x_train))
-        print('리뷰의 평균 길이 :',sum(map(len, pre_process.x_train))/len(pre_process.x_train))
-        
-        max_len = ((max(len(review) for review in pre_process.x_train) // 100) - 1) * 100
-        while True:
-            count = 0
-            for sentence in pre_process.x_train:
-                if len(sentence) <= max_len:
-                    count = count + 1
-                
-            rate = (count / len(pre_process.x_train)) * 100
-            if rate >= 99:
-                print('전체 샘플 중 길이가 %s 이하인 샘플의 비율: %s'%(max_len, (count / len(pre_process.x_train))*100))
-                print('모든 샘플의 길이 %s로 패딩'%(max_len))
-                pre_process.x_train = pad_sequences(pre_process.x_train, maxlen=max_len)
-                pre_process.x_test = pad_sequences(pre_process.x_test, maxlen=max_len)
+            # 정수 인코딩
+            tokenizer = Tokenizer(pre_process.vocab_size, oov_token = 'OOV')
+            tokenizer.fit_on_texts(pre_process.x_train)
+            pre_process.x_train = tokenizer.texts_to_sequences(pre_process.x_train)
+            pre_process.x_test = tokenizer.texts_to_sequences(pre_process.x_test)
+            
+            # 패딩 : 샘플들의 길이를 동일하게 맞춰줌
+            print('리뷰의 최대 길이 :',max(len(review) for review in pre_process.x_train))
+            print('리뷰의 평균 길이 :',sum(map(len, pre_process.x_train))/len(pre_process.x_train))
+            
+            max_len = ((max(len(review) for review in pre_process.x_train) // 100) - 1) * 100
+            while True:
+                count = 0
+                for sentence in pre_process.x_train:
+                    if len(sentence) <= max_len:
+                        count = count + 1
+                    
+                rate = (count / len(pre_process.x_train)) * 100
+                if rate >= 99:
+                    print('전체 샘플 중 길이가 %s 이하인 샘플의 비율: %s'%(max_len, (count / len(pre_process.x_train))*100))
+                    print('모든 샘플의 길이 %s로 패딩'%(max_len))
+                    pre_process.x_train = pad_sequences(pre_process.x_train, maxlen=max_len)
+                    pre_process.x_test = pad_sequences(pre_process.x_test, maxlen=max_len)
 
-                # label 타입 변경   
-                pre_process.y_train = np.array(pre_process.y_train).astype(np.float32)
-                pre_process.y_test = np.array(pre_process.y_test).astype(np.float32)    
-                break
-            else:
-                max_len = max_len + 1
+                    # label 타입 변경   
+                    pre_process.y_train = np.array(pre_process.y_train).astype(np.float32)
+                    pre_process.y_test = np.array(pre_process.y_test).astype(np.float32)    
+                    break
+                else:
+                    max_len = max_len + 1
+        except:
+            row_list = []
+            for row in self.df['상세내용']:
+                row = ast.literal_eval(row) # 문자열의 리스트화
+                row_list.append(row)
+            
+            self.df['상세내용'] = row_list
+            self.word_embedding()
 
 # 5. BiLSTM 모델 학습 
 class BiLSTM(pre_process):
