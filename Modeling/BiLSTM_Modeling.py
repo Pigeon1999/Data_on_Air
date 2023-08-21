@@ -338,7 +338,7 @@ def preprocessing(csv, num):
 
     Token = token(df)
     df = Token.token_processing() # 3. 토큰화
-  
+    
     if num == 0:
         df.to_csv('SNU_keyword_data.csv', index = False)
     elif num == 1:
