@@ -393,9 +393,9 @@ def predict_model(x_test, y_test):
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
 
-df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'utf-8')
-df = preprocessing(df, 2)
-print(df)
+#df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'utf-8')
+#df = preprocessing(df, 2)
+#print(df)
 
 ''' 
 <1. preprocessig 함수>
