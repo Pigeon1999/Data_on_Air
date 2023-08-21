@@ -35,7 +35,7 @@ Repository의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/
 
 # 사용 방법
 ### 1. Crawling 
-#### 실행 시간이 오래 걸려 Colab에서 실행하는 것을 추천 하지 않습니다. 
+#### Colab은 런타임이 제한되어 있어 VSCode환경에서 진행합니다.
 
 #### Crawling_SNU_data.py : snu_factcheck 사이트 경제 분야 크롤링 
 ```
@@ -64,13 +64,14 @@ Crawling_Youtube_data(SNU_keyword_data)
 ```
 
 ### 2. Modeling 
+#### VSCode환경에서도 가능하지만, 모델링을 위한 GPU가 필요하므로 Colab환경을 추천합니다.
 #### BiLSTM_Modeling.py 
 #### ① preprocessing() : 데이터 셋의 전처리 및 토큰화
 ```
 from Data_on_Air.Modeling.BiLSTM_Modeling import preprocessing
 
 # 크롤링한 데이터의 전처리 (0번 : snu_keyword. 1번 : naver_keyword, 2번 : youtube_keyword)
-df = preprocessing(SNU_data, num)
+df = preprocessing(df, num)
 ```
 
 #### ② make_model(df) : 전처리된 데이터로 Word2Vec와 BiLSTM기법 적용하여 모델 생성 
