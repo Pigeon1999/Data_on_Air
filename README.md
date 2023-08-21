@@ -35,7 +35,7 @@ Repository의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/
 
 # 사용 방법
 ### 1. Crawling 
-#### 실행 시간이 오래 걸려 Colab에서 실행하는 것을 추천 하지 않습니다. 
+#### Colab은 런타임이 제한되어 있어 VSCode환경에서 진행합니다.
 
 #### Crawling_SNU_data.py : snu_factcheck 사이트 경제 분야 크롤링 
 ```
@@ -64,6 +64,7 @@ Crawling_Youtube_data(SNU_keyword_data)
 ```
 
 ### 2. Modeling 
+#### 모델링을 위한 GPU가 필요하므로 Colab환경에서 진행합니다. 
 #### BiLSTM_Modeling.py 
 #### ① preprocessing() : 데이터 셋의 전처리 및 토큰화
 ```
