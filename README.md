@@ -71,7 +71,7 @@ Crawling_Youtube_data(SNU_keyword_data)
 from Data_on_Air.Modeling.BiLSTM_Modeling import preprocessing
 
 # 크롤링한 데이터의 전처리 (0번 : snu_keyword. 1번 : naver_keyword, 2번 : youtube_keyword)
-df = preprocessing(SNU_data, num)
+df = preprocessing(df, num)
 ```
 
 #### ② make_model(df) : 전처리된 데이터로 Word2Vec와 BiLSTM기법 적용하여 모델 생성 
