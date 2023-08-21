@@ -69,45 +69,6 @@ class text(pre_process):
     # 2-1 특수문자 제거
     def remove_special_characters(self, text):
         return re.sub('[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9\s]', '', text)
-
-    # 2-2 맞춤법 검사
-    def spell_check_text(self, text):
-        try:
-            result = spell_checker.check(text)
-            corrected_text = result.checked
-            return corrected_text
-        except Exception as e:
-            print("Error:", e)
-            return text
-
-    # 텍스트를 띄어쓰기 구분해 리스트로
-    def split_text(self, text):
-        word_list = text.split()
-        return word_list
-
-    # 네이버 맞춤법 검사기는 최대 500자이므로 '상세내용'을 500자이하로 묶어 리스트로 만듬
-    def group_text_items(self, text_list, max_length=400):
-        grouped_texts = []
-        current_group = []
-
-        current_length = 0
-        for item in text_list:
-            item_length = len(item) + 1  # 항목 길이 + 띄어쓰기 길이
-
-            # 항목을 더했을 때 최대 글자수를 초과하는 경우 새로운 그룹 시작
-            if current_length + item_length > max_length:
-                grouped_texts.append(' '.join(current_group))
-                current_group = []
-                current_length = 0
-
-            current_group.append(item)
-            current_length += item_length
-
-        # 남은 항목이 있는 경우 마지막 그룹 추가
-        if current_group:
-            grouped_texts.append(' '.join(current_group))
-
-        return grouped_texts
     
     def text_processing(self):
         contents = ['내용', '상세내용']
@@ -125,50 +86,18 @@ class text(pre_process):
         self.df['내용'] = self.df['내용'].apply(self.remove_special_characters)
         self.df['상세내용'] = self.df['상세내용'].apply(self.remove_special_characters)
         
-        #############################################################################
-        '''
-        for content in contents:
-        # 내용 맞춤법 검사
-            text = self.split_text(self.df[content][0])
-            print(text)
-            
-            grouped_text_list = self.group_text_items(text)
-
-            # 맞춤법 검사 및 수정된 결과로 다시 합치기
-            corrected_grouped_texts = []
-            for group in grouped_text_list:
-                corrected_group = self.spell_check_text(group)
-                corrected_grouped_texts.append(corrected_group)
-
-            corrected_text = ' '.join(corrected_grouped_texts)
-
-            # 모든 행에 대해 작업 수행
-            corrected_texts = []
-            for index, row in self.df.iterrows():
-                text = self.split_text(row[content])
-                grouped_text_list = self.group_text_items(text)
-
-                corrected_grouped_texts = []
-                for group in grouped_text_list:
-                    corrected_group = self.spell_check_text(group)
-                    corrected_grouped_texts.append(corrected_group)
-
-                corrected_text = ' '.join(corrected_grouped_texts)
-                corrected_texts.append(corrected_text)
-
-            # 수정된 결과로 변경
-            self.df[content] = corrected_texts
-        '''
-        
+        # 맞춤법 검사
         for row in range(0, len(self.df['상세내용'])):
             texts = ''
             for i in range(0, int(len(self.df['상세내용'][row]) / 500) + 1):
                 data = self.df['상세내용'][row][0 + (500 * i):500 + (500 * i)]
-                result = spell_checker.check(data).checked
+                try:
+                    result = spell_checker.check(data).checked
+                except:
+                    result = data
                 texts = texts + result
             self.df['상세내용'][row] = texts
-            print('done')
-        ###################################################################    
+            print('done') 
             
         # 2-3 불용어 제거 
         stop_words = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\stopwords.csv', encoding = 'utf-8')['불용어']
