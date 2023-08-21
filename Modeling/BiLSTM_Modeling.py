@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from konlpy.tag import Okt
+from konlpy.tag import Kkma
 from nltk import sent_tokenize
 from collections import Counter
 from nltk.corpus import stopwords
@@ -40,13 +41,11 @@ class pre_process:
         self.okt = Okt()
         self.df = csv
 
-# 1. 주제 없애고 label까지 처리        
+# 1. label 처리       
 class label(pre_process):
     def label_processing(self):
-        self.df.dropna(axis=0, inplace=True) # 결측치 제거
+        self.df.dropna(axis=0, inplace=True)
         self.df= self.df.drop(columns=['주제'])
-        self.df['row_id'] = range(0, len(self.df))
-        self.df['row_id'] = self.df['row_id'].astype(int)
         
         try:
             idx = self.df.loc[self.df['label']=='판단 유보'].index
@@ -58,13 +57,17 @@ class label(pre_process):
         except:
             pass
         
+        self.df['row_id'] = range(0, len(self.df))
+        self.df.index = range(0, len(self.df))
+        self.df['row_id'] = self.df['row_id'].astype(int)
+        
         return self.df
     
 # 2. '내용, 상세내용'의 특수문자 제거, 불용어 제거, 맞춤법 조정       
 class text(pre_process):
+    
     # 2-1 특수문자 제거
     def remove_special_characters(self, text):
-        # 한글, 알파벳, 숫자, 공백을 제외한 문자 제거
         return re.sub('[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9\s]', '', text)
 
     # 2-2 맞춤법 검사
@@ -82,7 +85,8 @@ class text(pre_process):
         word_list = text.split()
         return word_list
 
-    def group_text_items(self, text_list, max_length=500):
+    # 네이버 맞춤법 검사기는 최대 500자이므로 '상세내용'을 500자이하로 묶어 리스트로 만듬
+    def group_text_items(self, text_list, max_length=400):
         grouped_texts = []
         current_group = []
 
@@ -105,9 +109,9 @@ class text(pre_process):
 
         return grouped_texts
     
-    # 2. '내용, 상세내용'의 특수문자 제거, 불용어 제거, 맞춤법 조정
     def text_processing(self):
         contents = ['내용', '상세내용']
+          
         special = [r'%', r'M&A', r'㎡', r'㎞', r'~', r'㏊', r'CO₂', r'㎢', r'ℓ']
         transform = [r'퍼센트', r'인수합병', r'제곱미터', r'km', r'에서 ', r'ha', r'이산화탄소', r'제곱킬로미터', r'리터']
         for i in range(0, 9):
@@ -121,10 +125,13 @@ class text(pre_process):
         self.df['내용'] = self.df['내용'].apply(self.remove_special_characters)
         self.df['상세내용'] = self.df['상세내용'].apply(self.remove_special_characters)
         
+        #############################################################################
+        '''
         for content in contents:
         # 내용 맞춤법 검사
             text = self.split_text(self.df[content][0])
-
+            print(text)
+            
             grouped_text_list = self.group_text_items(text)
 
             # 맞춤법 검사 및 수정된 결과로 다시 합치기
@@ -151,6 +158,24 @@ class text(pre_process):
 
             # 수정된 결과로 변경
             self.df[content] = corrected_texts
+        '''
+        
+        for row in range(0, len(self.df['상세내용'])):
+            texts = ''
+            for i in range(0, int(len(self.df['상세내용'][row]) / 500) + 1):
+                data = self.df['상세내용'][row][0 + (500 * i):500 + (500 * i)]
+                result = spell_checker.check(data).checked
+                texts = texts + result
+            self.df['상세내용'][row] = texts
+            print('done')
+        ###################################################################    
+            
+        # 2-3 불용어 제거 
+        stop_words = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\stopwords.csv', encoding = 'utf-8')['불용어']
+        for row in range(0, len(self.df['상세내용'])):
+            word_tokens = self.okt.morphs(self.df['상세내용'][row])
+            result = [word for word in word_tokens if not word in stop_words]
+            self.df['상세내용'][row] = result
             
         return self.df 
 
@@ -166,7 +191,6 @@ class token(pre_process):
                     words.append(word)
         return words
 
-    # 3. 토큰화
     def token_processing(self):
         self.df= self.df.astype('str')
         self.df['상세내용'] = self.df['상세내용'].apply(self.tokenizer)
@@ -179,16 +203,17 @@ class token(pre_process):
         most_common_words_data = []
         for text in self.df['상세내용']:
             word_counts = Counter(text)
-            most_common_words = word_counts.most_common()
+            most_common_words = word_counts.most_common() # 단어를 빈도수로 정렬 
 
+            # 단어의 빈도수가 3회이하는 제거 
             most_common_words_only = [word for word, count in most_common_words if count > 2]
             temp_data.append(len(most_common_words_only))
             most_common_words_data.append(most_common_words_only)
-
+            
         self.df['temp'] = temp_data
         self.df['빈도순'] = most_common_words_data
-
-
+        self.df['상세내용'] = most_common_words_data
+        
         for row in range(0, len(self.df)):
             temp = self.df['temp']
             if int(temp[row]) == 0:
@@ -196,13 +221,13 @@ class token(pre_process):
 
         del self.df['temp']
         self.df['row_id'] = range(0, len(self.df))
-        self.df.index = self.df['row_id']
+        self.df.index = self.df['row_id']     
         
         return self.topic_modeling()
 
-    #
+    # 유사한 주제의 뉴스 제거 
     def topic_modeling(self):
-        new_df = self.df['빈도순'].copy()  # .copy() 메서드를 사용하여 복사본 생성
+        new_df = self.df['빈도순'].copy() 
         for row in range(0, len(new_df)):
             frequency_counter = Counter(new_df[row])
             top_n_frequencies = frequency_counter.most_common(10)
@@ -226,11 +251,11 @@ class token(pre_process):
                             try:
                                 if data[i][j] in data[row]:
                                     count = count + 1
-                                    if count >= 4: # n개의 키워드가 같을시 유사한 주제로 판단.
+                                    if count >= 4: # 4개의 키워드가 같을시 유사한 주제로 판단.
                                         group.append(row)  # 인덱스를 추가
                                         data[row] = []
                                         count = 0
-                                        break  # 더이상 반복할 필요 없음
+                                        break  
                             except:
                                 continue
 
@@ -403,9 +428,9 @@ def predict_model(x_test, y_test):
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
 
-#df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'utf-8')
-#df = preprocessing(df, 2)
-#print(df)
+df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')[:100]
+df = preprocessing(df, 99)
+print(df)
 
 ''' 
 <1. preprocessig 함수>
