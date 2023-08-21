@@ -43,17 +43,20 @@ class pre_process:
 class label(pre_process):
     def label_processing(self):
         self.df.dropna(axis=0, inplace=True) # 결측치 제거
-        idx = self.df.loc[self.df['label']=='판단 유보'].index
-        self.df = self.df.drop(idx, axis=0)
-        idx = self.df.loc[self.df['label']=='논쟁 중'].index
-        self.df = self.df.drop(idx, axis=0)
         self.df= self.df.drop(columns=['주제'])
-        self.df['label'] = self.df['label'].replace({'전혀 사실 아님': 0, '대체로 사실 아님': 0, '절반의 사실': 0, '대체로 사실': 1, '사실': 1})
-        
         self.df['row_id'] = range(0, len(self.df))
         self.df['row_id'] = self.df['row_id'].astype(int)
-        self.df['label'] = self.df['label'].astype(int)
-
+        
+        try:
+            idx = self.df.loc[self.df['label']=='판단 유보'].index
+            self.df = self.df.drop(idx, axis=0)
+            idx = self.df.loc[self.df['label']=='논쟁 중'].index
+            self.df = self.df.drop(idx, axis=0)
+            self.df['label'] = self.df['label'].replace({'전혀 사실 아님': 0, '대체로 사실 아님': 0, '절반의 사실': 0, '대체로 사실': 1, '사실': 1})
+            self.df['label'] = self.df['label'].astype(int)
+        except:
+            pass
+        
         return self.df
     
 # 2. '내용, 상세내용'의 특수문자 제거, 불용어 제거, 맞춤법 조정       
@@ -390,9 +393,9 @@ def predict_model(x_test, y_test):
     print(f'{correct_data/len(y_test) * 100:.2f}%')
 
 
-#df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')[:10]
-#df = preprocessing(df, 5)
-#print(df)
+df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'utf-8')
+df = preprocessing(df, 2)
+print(df)
 
 ''' 
 <1. preprocessig 함수>
