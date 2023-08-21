@@ -64,7 +64,7 @@ Crawling_Youtube_data(SNU_keyword_data)
 ```
 
 ### 2. Modeling 
-#### 모델링을 위한 GPU가 필요하므로 Colab환경에서 진행합니다. 
+#### VSCode환경에서도 가능하지만, 모델링을 위한 GPU가 필요하므로 Colab환경을 추천합니다.
 #### BiLSTM_Modeling.py 
 #### ① preprocessing() : 데이터 셋의 전처리 및 토큰화
 ```
