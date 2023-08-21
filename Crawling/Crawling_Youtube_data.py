@@ -41,7 +41,7 @@ class Youtube_Crawling:
         self.chrome_options.add_argument('--headless')
         self.chrome_options.add_argument('--no-sandbox')
         self.chrome_options.add_argument('--disable-dev-shm-usage')
-        self.dr = webdriver.Chrome(options = self.chrome_options)
+        self.driver = webdriver.Chrome(options = self.chrome_options)
 
         self.driver.get(self.url)  # 드라이버를 통해 url의 웹 페이지를 오픈
         time.sleep(2)
@@ -132,8 +132,8 @@ def Crawling_Youtube_data(df):
     
     return new_df
 
-#df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'utf-8')
-#Crawling_Youtube_data(df)
+df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_keyword_data.csv', encoding = 'utf-8')
+Crawling_Youtube_data(df)
 
 '''
 [실행코드]
