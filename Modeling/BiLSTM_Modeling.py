@@ -97,7 +97,7 @@ class text(pre_process):
                     result = data
                 texts = texts + result
             self.df['상세내용'][row] = texts
-            print('done') 
+            print(f'done : {row}') 
             
         # 2-3 불용어 제거 
         stop_words = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\stopwords.csv', encoding = 'utf-8')['불용어']
@@ -117,16 +117,13 @@ class token(pre_process):
         for word, tag in morph:
             if tag in ['Noun']:
                 if len(word) > 1:
-                    words.append(word)
+                    if word not in ['주장', '사실', '검증']:
+                        words.append(word)
         return words
 
     def token_processing(self):
         self.df= self.df.astype('str')
         self.df['상세내용'] = self.df['상세내용'].apply(self.tokenizer)
-
-        for list in self.df['상세내용']:
-            word_counts = Counter(list)
-            most_common_word = word_counts.most_common(1)[0][0]
 
         temp_data = []
         most_common_words_data = []
@@ -150,7 +147,7 @@ class token(pre_process):
 
         del self.df['temp']
         self.df['row_id'] = range(0, len(self.df))
-        self.df.index = self.df['row_id']     
+        self.df.index = range(0, len(self.df))   
         
         return self.topic_modeling()
 
@@ -207,63 +204,87 @@ class token(pre_process):
         del self.df['group_id']
         
         self.df['row_id'] = range(0, len(self.df))
-        self.df.index = self.df['row_id']
+        self.df.index = range(0, len(self.df))
         
         return self.df
 
 # 4. 워드 임베딩 
 class Word_Embedding(pre_process):      
     def word_embedding(self):
-        try:
-            # Word2Vec 모델로 학습된 임베딩 벡터 가져오기
-            model = Word2Vec(sentences = self.df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
-            embedding_matrix = model.wv.vectors
-            pre_process.vocab_size, pre_process.embedding_dim = embedding_matrix.shape
-
-            x = self.df['상세내용']
-            y = self.df['label']
-
-            pre_process.x_train, pre_process.x_test, pre_process.y_train, pre_process.y_test = train_test_split(x, y, test_size=0.2, stratify=y, random_state=42)
-            print(f'TF갯수 : {int(len(pre_process.y_train) / 2)}개씩.. 1:1비율')
-
-            # 정수 인코딩
-            tokenizer = Tokenizer(pre_process.vocab_size, oov_token = 'OOV')
-            tokenizer.fit_on_texts(pre_process.x_train)
-            pre_process.x_train = tokenizer.texts_to_sequences(pre_process.x_train)
-            pre_process.x_test = tokenizer.texts_to_sequences(pre_process.x_test)
-            
-            # 패딩 : 샘플들의 길이를 동일하게 맞춰줌
-            print('리뷰의 최대 길이 :',max(len(review) for review in pre_process.x_train))
-            print('리뷰의 평균 길이 :',sum(map(len, pre_process.x_train))/len(pre_process.x_train))
-            
-            max_len = ((max(len(review) for review in pre_process.x_train) // 100) - 1) * 100
-            while True:
-                count = 0
-                for sentence in pre_process.x_train:
-                    if len(sentence) <= max_len:
-                        count = count + 1
-                    
-                rate = (count / len(pre_process.x_train)) * 100
-                if rate >= 99:
-                    print('전체 샘플 중 길이가 %s 이하인 샘플의 비율: %s'%(max_len, (count / len(pre_process.x_train))*100))
-                    print('모든 샘플의 길이 %s로 패딩'%(max_len))
-                    pre_process.x_train = pad_sequences(pre_process.x_train, maxlen=max_len)
-                    pre_process.x_test = pad_sequences(pre_process.x_test, maxlen=max_len)
-
-                    # label 타입 변경   
-                    pre_process.y_train = np.array(pre_process.y_train).astype(np.float32)
-                    pre_process.y_test = np.array(pre_process.y_test).astype(np.float32)    
-                    break
-                else:
-                    max_len = max_len + 1
-        except:
+        if type(self.df['상세내용'][0]) == str:
             row_list = []
             for row in self.df['상세내용']:
                 row = ast.literal_eval(row) # 문자열의 리스트화
-                row_list.append(row)
-            
+                row_list.append(row)         
             self.df['상세내용'] = row_list
-            self.word_embedding()
+
+        # Word2Vec 모델로 학습된 임베딩 벡터 가져오기
+        model = Word2Vec(sentences = self.df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
+        embedding_matrix = model.wv.vectors
+        pre_process.vocab_size, pre_process.embedding_dim = embedding_matrix.shape
+
+        # 품사 분석기 초기화
+        kkma = Kkma()
+        result = model.wv.most_similar("경제", topn=15000) # 경제와 관련된 상위 15,000개 가져오기
+    
+        # 명사 걸러내기
+        filtered_result = []
+        for word, score in result: # word가 단어, score가 유사 비율(%)
+            # 단어 품사 분석
+            pos_tags = kkma.pos(word)
+            for _, tag in pos_tags:
+                if tag == 'NNG':  # 명사인 경우만 추가
+                    filtered_result.append(word)
+                    break
+        
+        for row in range(0, len(self.df)):
+            df_data = self.df['상세내용'][row]
+            result = list(set(df_data) & set(filtered_result))                       
+            self.df['상세내용'][row] = result
+        
+        x = self.df['상세내용']
+        if 'label' in self.df.columns:
+            y = self.df['label']
+
+            pre_process.x_train, pre_process.x_test, pre_process.y_train, pre_process.y_test = train_test_split(x, y, test_size=0.2, stratify=y, random_state=42)
+            # label 타입 변경   
+            pre_process.y_train = np.array(pre_process.y_train).astype(np.float32)
+            pre_process.y_test = np.array(pre_process.y_test).astype(np.float32)   
+            print(f'TF갯수 : {int(len(pre_process.y_train) / 2)}개씩.. 1:1비율')           
+        else:
+            print('네이버 유튜브 데이터')
+            pre_process.x_train = np.array(x)
+            tokenizer = Tokenizer(pre_process.vocab_size, oov_token = 'OOV')
+            tokenizer.fit_on_texts(pre_process.x_train)
+            
+        # 정수 인코딩
+        tokenizer = Tokenizer(pre_process.vocab_size, oov_token = 'OOV')
+        tokenizer.fit_on_texts(pre_process.x_train)
+        pre_process.x_train = tokenizer.texts_to_sequences(pre_process.x_train)
+        pre_process.x_test = tokenizer.texts_to_sequences(pre_process.x_test)
+        
+        # 패딩 : 샘플들의 길이를 동일하게 맞춰줌
+        print('리뷰의 최대 길이 :',max(len(review) for review in pre_process.x_train))
+        print('리뷰의 평균 길이 :',sum(map(len, pre_process.x_train))/len(pre_process.x_train))
+        
+        max_len = ((max(len(review) for review in pre_process.x_train) // 100) - 1) * 100
+        while True:
+            count = 0
+            for sentence in pre_process.x_train:
+                if len(sentence) <= max_len:
+                    count = count + 1
+                
+            rate = (count / len(pre_process.x_train)) * 100
+            if rate >= 99:
+                print('전체 샘플 중 길이가 %s 이하인 샘플의 비율: %s'%(max_len, (count / len(pre_process.x_train))*100))
+                print('모든 샘플의 길이 %s로 패딩'%(max_len))
+                pre_process.x_train = pad_sequences(pre_process.x_train, maxlen=max_len)
+                pre_process.x_test = pad_sequences(pre_process.x_test, maxlen=max_len) 
+                break
+            else:
+                max_len = max_len + 1        
+        
+        return  pre_process.x_train, pre_process.y_train, pre_process.x_test, pre_process.y_test
 
 # 5. BiLSTM 모델 학습 
 class BiLSTM(pre_process):
@@ -287,8 +308,6 @@ class BiLSTM(pre_process):
         # 모델 학습
         trained_model = model.fit(pre_process.x_train, pre_process.y_train, epochs = 15, callbacks=[es, mc], batch_size = 256, validation_split = 0.2)
         model.save('trained_BiLSTM_model') 
-        loaded_model = load_model('trained_BiLSTM_model')   
-        print("테스트 정확도: %.4f" % (loaded_model.evaluate(pre_process.x_test, pre_process.y_test)[1]))
     
 def preprocessing(csv, num):
     Pre_process = pre_process(csv)
@@ -312,21 +331,44 @@ def preprocessing(csv, num):
     else:
         df.to_csv('sample_data.csv', index = False)
     
-    
     return df
 
-def make_model(df):
-    word_embedding = Word_Embedding(df)
-    word_embedding.word_embedding()
+def word_embedding(df):
+    word_embedding = Word_Embedding(df)      
+    return  word_embedding.word_embedding()
 
+def make_model(df):
     bilstm = BiLSTM(df)
     bilstm.make_BiLSTM()
+    print('모델이 생성되었습니다.')
 
 def predict_model(x_test, y_test):
     loaded_model = load_model('trained_BiLSTM_model')  
+ 
+    #print("테스트 정확도: %.4f" % (loaded_model.evaluate(pre_process.x_test, pre_process.y_test)[1]))
     correct_data = 0
     score = loaded_model.predict(x_test) # 예측
 
+    try:
+        for i in range(0, len(x_test)):
+            if(score[i][1] > 0.5):
+                print(f"{score[i][1] * 100:.2f}% 확률로 참입니다. <실제 판단 여부 : {y_test[i]}>")
+                if y_test[i] == 1:
+                    correct_data = correct_data + 1
+            else:
+                print(f"{(1 - score[i][1]) * 100:.2f}% 확률로 거짓입니다. <실제 판단 여부 : {y_test[i]}>")
+                if y_test[i] == 0:
+                    correct_data = correct_data + 1
+        print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
+        print(f'{correct_data/len(y_test) * 100:.2f}%')
+    except:
+        for i in range(0, len(x_test)):
+            if(score[i][1] > 0.5):
+                print(f"{score[i][1] * 100:.2f}% 확률로 참입니다.")
+            else:
+                print(f"{(1 - score[i][1]) * 100:.2f}% 확률로 거짓입니다.")
+
+               
     # 정밀도ㅡ재현율-F1-Score 계산 초기식
     predicted_labels = loaded_model.predict(pre_process.x_test)
     predicted_labels = np.argmax(predicted_labels, axis=1)
@@ -344,22 +386,38 @@ def predict_model(x_test, y_test):
     f1 = f1_score(true_labels, predicted_labels, average='weighted')
     print("F1 테스트: {}".format(f1))
 
-    for i in range(0, len(x_test)):
-        if(score[i][1] > 0.5):
-            print(f"{score[i][1] * 100:.2f}% 확률로 참입니다. <실제 판단 여부 : {y_test[i]}>")
-            if y_test[i] == 1:
-                correct_data = correct_data + 1
-        else:
-            print(f"{(1 - score[i][1]) * 100:.2f}% 확률로 거짓입니다. <실제 판단 여부 : {y_test[i]}>")
-            if y_test[i] == 0:
-                correct_data = correct_data + 1
-    print(f'정답률 {len(y_test)}개중 {correct_data}개 정답.')
-    print(f'{correct_data/len(y_test) * 100:.2f}%')
+
+###########################################################################################
+# 1. 전처리 + 토큰화까지 과정                                                             
+#csv = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')    
+#snu_df = preprocessing(csv)                                                            
+#csv = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Naver_data.csv', encoding = 'cp949')  
+#naver_df = preprocessing(csv)                                                          
+#csv = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'cp949')
+#youtube_df = preprocessing(csv)                                                        
+###########################################################################################
+
+'''
+# 2. 워드 임베딩 + 정수 인코딩 + 패딩
+snu_df = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
+snu_x_train, snu_y_train, snu_x_test, snu_y_test = word_embedding(snu_df)
+
+# 3. BiLSTM모델 생성 
+make_model(snu_df)
+
+# 4. SNU로 학습한 모델로 1차 예측 
+predict_model(snu_x_test, snu_y_test)
+'''
+
+naver_df = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/Naver_keyword_data.csv', encoding = 'utf-8')
+naver_x_train, _, _, _ = word_embedding(naver_df)
+
+youtube_df = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/youtube_keyword_data.csv', encoding = 'utf-8')
+youtube_x_train, _, _, _ = word_embedding(youtube_df)
 
 
-df = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')[:100]
-df = preprocessing(df, 99)
-print(df)
+# 3. BiLSTM모델 생성 
+
 
 ''' 
 <1. preprocessig 함수>
