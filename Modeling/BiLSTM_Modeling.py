@@ -27,11 +27,9 @@ from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dense
 nltk.download('punkt')
 
 # 초기 설정
-class pre_process: 
-    
+class pre_process:  
     def __init__(self, csv):
         #os.chdir('py-hanspell')
-        self.okt = Okt()
         self.df = csv
 
 # 1. label 처리       
@@ -58,7 +56,6 @@ class label(pre_process):
     
 # 2. '내용, 상세내용'의 특수문자 제거, 불용어 제거, 맞춤법 조정       
 class text(pre_process):
-    
     # 2-1 특수문자 제거
     def remove_special_characters(self, text):
         return re.sub('[^ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9\s]', '', text)
@@ -103,6 +100,10 @@ class text(pre_process):
 
 # 3. 토큰화
 class token(pre_process):  
+    def __init__(self, csv):
+        super().__init__(csv)
+        self.okt = Okt()
+        
     # '상세내용' 토큰화
     def tokenizer(self, text):
         morph = self.okt.pos(text)
@@ -201,6 +202,43 @@ class token(pre_process):
         
         return self.df
 
+    # 명사가 아닌 단어 제거 & train data와의 키워드 갯수 범위 조정 
+    def noun_filter(self):
+        if type(self.df['상세내용'][0]) == str:
+            row_list = []
+            for row in self.df['상세내용']:
+                row = ast.literal_eval(row) # 문자열의 리스트화
+                row_list.append(row)         
+            self.df['상세내용'] = row_list
+        
+        # 품사 분석기 초기화
+        model = Word2Vec(sentences = self.df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
+        kkma = Kkma()
+        result = model.wv.most_similar("경제", topn=15000) # 경제와 관련된 상위 15,000개 가져오기
+    
+        # 명사 걸러내기
+        filtered_result = []
+        for word, score in result: # word가 단어, score가 유사 비율(%)
+            # 단어 품사 분석
+            pos_tags = kkma.pos(word)
+            for _, tag in pos_tags:
+                if tag == 'NNG':  # 명사인 경우만 추가
+                    filtered_result.append(word)
+                    break
+        
+        for row in range(0, len(self.df)):
+            df_data = self.df['상세내용'][row]
+            result = list(set(df_data) & set(filtered_result))                       
+            self.df['상세내용'][row] = result
+            
+        # 키워드가 3개 이하, 64개 이상이면 제거
+        for row in range(0, len(self.df)):
+            if len(self.df['상세내용'][row]) <= 3 or len(self.df['상세내용'][row]) >= 64:
+                self.df = self.df.drop(row)
+        self.df['row_id'] = range(0, len(self.df))
+        self.df.index = range(0, len(self.df))
+        
+        return self.df
 
 # 4. 워드 임베딩 & 5. BiLSTM
 class Model: 
@@ -224,34 +262,7 @@ class Model:
         model = Word2Vec(sentences = df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
         embedding_matrix = model.wv.vectors
         Model.vocab_size, Model.embedding_dim = embedding_matrix.shape
-
-        # 품사 분석기 초기화
-        model = Word2Vec(sentences = self.df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
-        kkma = Kkma()
-        result = model.wv.most_similar("경제", topn=15000) # 경제와 관련된 상위 15,000개 가져오기
-    
-        # 명사 걸러내기
-        filtered_result = []
-        for word, score in result: # word가 단어, score가 유사 비율(%)
-            # 단어 품사 분석
-            pos_tags = kkma.pos(word)
-            for _, tag in pos_tags:
-                if tag == 'NNG':  # 명사인 경우만 추가
-                    filtered_result.append(word)
-                    break
-        
-        for row in range(0, len(df)):
-            df_data = df['상세내용'][row]
-            result = list(set(df_data) & set(filtered_result))                       
-            df['상세내용'][row] = result
-            
-        # 키워드가 3개 이하, 64개 이상이면 제거
-        for row in range(0, len(df)):
-            if len(df['상세내용'][row]) <= 3 or len(df['상세내용'][row]) >= 64:
-                df = df.drop(row)
-        df['row_id'] = range(0, len(df))
-        df.index = range(0, len(df))
-        
+   
         x = df['상세내용']
         if 'label' in df.columns:
             y = df['label']
@@ -414,6 +425,20 @@ def self_training(x_test, df):
 #csv = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'cp949')
 #youtube_df = preprocessing(csv)                                                        
 ###########################################################################################
+
+csv = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')    
+df = token(csv).noun_filter()  
+df.to_csv('SNU_keyword_data.csv', index = False)     
+print('1')                                                    
+csv = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/Naver_keyword_data.csv', encoding = 'utf-8')  
+df = token(csv).noun_filter()   
+df.to_csv('Naver_keyword_data.csv', index = False)  
+print('2')                                                    
+csv = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/Youtube_keyword_data.csv', encoding = 'utf-8')
+df = token(csv).noun_filter() 
+df.to_csv('Youtube_keyword_data.csv', index = False)
+print('3')
+
 
 # 2. 워드 임베딩 + 정수 인코딩 + 패딩
 # snu_df = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
