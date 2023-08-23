@@ -240,6 +240,21 @@ class token(pre_process):
         
         return self.df
 
+    def match_label(self):
+        T = self.df[self.df['label'] == 1]
+        F = self.df[self.df['label'] == 0]
+        if len(T) >= len(F):
+            for _ in range(0, np.abs(len(T) - len(F))):
+                T = T[:-1]
+        else:
+            for _ in range(0, np.abs(len(T) - len(F))):
+                F = F[:-1]
+        
+        new_df = T.append(F)
+        new_df = Model().list_to_str(new_df)
+        
+        return new_df
+        
 # 4. 워드 임베딩 & 5. BiLSTM
 class Model: 
     def __init__(self):
@@ -253,13 +268,14 @@ class Model:
     def list_to_str(self, df):
         df['row_id'] = range(0, len(df))
         df.index = range(0, len(df))
+        
         if type(df['상세내용'][0]) == str:
             row_list = []
             for row in df['상세내용']:
                 row = ast.literal_eval(row) # 문자열의 리스트화
                 row_list.append(row)         
             df['상세내용'] = row_list   
-        
+
         return df     
       
     def word_embedding(self, df):
@@ -274,10 +290,13 @@ class Model:
             y = df['label']
 
             self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(x, y, test_size=0.2, stratify=y, random_state=42)
+            print(list(self.y_train).count(1), list(self.y_train).count(0))
+            print(list(self.y_test).count(1), list(self.y_test).count(0))
+
             # label 타입 변경   
             self.y_train = np.array(self.y_train).astype(np.float32)
             self.y_test = np.array(self.y_test).astype(np.float32)   
-            print(f'TF갯수 : {int(len(self.y_train) / 2)}개씩.. 1:1비율')           
+                    
         else:
             self.x_train = np.array(x)
             tokenizer = Tokenizer(self.vocab_size, oov_token = 'OOV')
@@ -361,15 +380,27 @@ class Model:
         
         for i in range(0, len(self.x_test)):
             if(score[i][1] > 0.5):
-                print(f"{score[i][1] * 100:.2f}% 확률로 참입니다. <실제 판단 여부 : {self.y_test[i]}>")
                 if self.y_test[i] == 1:
                     correct_data = correct_data + 1
             else:
-                print(f"{(1 - score[i][1]) * 100:.2f}% 확률로 거짓입니다. <실제 판단 여부 : {self.y_test[i]}>")
                 if self.y_test[i] == 0:
                     correct_data = correct_data + 1
         print(f'정답률 {len(self.y_test)}개중 {correct_data}개 정답.')
         print(f'{correct_data/len(self.y_test) * 100:.2f}%')
+        
+    def predict_model(self):
+        loaded_model = load_model('trained_BiLSTM_model')  
+        score = loaded_model.predict(self.x_test) # 예측
+        
+        for i in range(0, len(self.x_test)):
+            if(score[i][1] > 0.2):
+                if self.y_test[i] == 1:
+                    correct_data = correct_data + 1
+            else:
+                if self.y_test[i] == 0:
+                    correct_data = correct_data + 1
+        print(f'정답률 {len(self.y_test)}개중 {correct_data}개 정답.')
+        print(f'{correct_data/len(self.y_test) * 100:.2f}%')            
         
     def labeling(self):
         loaded_model = load_model('trained_BiLSTM_model') 
@@ -414,11 +445,26 @@ def make_model(df):
 # 예측하고 싶은 Naver/Youtube data중 택하여 자동 labeling
 def labeling(df):
     model = Model()
+    df = model.list_to_str(df)
     model.word_embedding(df)
 
     loaded_model = load_model('trained_BiLSTM_model') 
-    unlabeled_predictions = loaded_model.predict(model.x_train)
-    label = np.argmax(unlabeled_predictions, axis=1)
+    score = loaded_model.predict(model.x_train)
+    label = []
+    print(score)
+    for i in range(0, len(score)):
+        if (score[i][0] > 0.5):
+            label.append(1)
+        else:
+            label.append(0)
+    
+    #unlabeled_predictions = loaded_model.predict(model.x_train)
+    #label = np.argmax(unlabeled_predictions, axis=1)
+    
+    print(label.count(1))
+    print(label.count(0))
+
+    
     df['label'] = label
     
     return df
@@ -456,35 +502,33 @@ def labeling(df):
 #youtube_df.to_csv('Youtube_keyword_data.csv', index = False)
 ###########################################################################################
 
+
 ###########################################################################################
 # 3. SNU_keyword_data로 BiLSTM모델 생성 
 snu_df = pd.read_csv('SNU_keyword_data.csv', encoding = 'utf-8')
-snu_df = Model().list_to_str(snu_df)
-#make_model(snu_df)
+snu_df = Model().list_to_str(snu_df) 
+snu_df = token(snu_df).match_label() 
+make_model(snu_df)
 ###########################################################################################
 
 ###########################################################################################
-# 네이버 TF예측
-naver_df = pd.read_csv('Naver_keyword_data.csv', encoding = 'utf-8')[:100]
-naver_df = Model().list_to_str(naver_df)
-#naver_df = labeling(naver_df)
-naver_df['label'] = 1
-df = snu_df.append(naver_df)
-#make_model(df)
+# 4. 네이버 TF예측
+naver_df = pd.read_csv('Naver_keyword_data.csv', encoding = 'utf-8')
+youtube_df = pd.read_csv('Youtube_keyword_data.csv', encoding = 'utf-8')
+new_df = naver_df.append(youtube_df)
+new_df = Model().list_to_str(new_df)
+count = 0
+train_df = snu_df
 
-naver_df = pd.read_csv('Naver_keyword_data.csv', encoding = 'utf-8')[100:200]
-naver_df = Model().list_to_str(naver_df)
-naver_df = labeling(naver_df)
-df = df.append(naver_df)
-make_model(df)
-###########################################################################################
+while True:
+    
+    df = naver_df[0 + (count * 30) : 30 + (count * 30)]
+    df = labeling(df)
+        
+    train_df = train_df.append(df)
+    #train_df = token(train_df).match_label() 
+    make_model(train_df)
 
-
-'''
-youtube_df = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/youtube_keyword_data.csv', encoding = 'utf-8')
-youtube_x_test, _, _, _ = word_embedding(youtube_df)
-youtube_df = self_training(youtube_x_test, youtube_df)
+    count = count + 1
 
 
-# 3. BiLSTM모델 생성 
-'''
