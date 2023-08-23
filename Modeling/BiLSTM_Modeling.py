@@ -226,6 +226,7 @@ class Model:
         Model.vocab_size, Model.embedding_dim = embedding_matrix.shape
 
         # 품사 분석기 초기화
+        model = Word2Vec(sentences = self.df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
         kkma = Kkma()
         result = model.wv.most_similar("경제", topn=15000) # 경제와 관련된 상위 15,000개 가져오기
     
