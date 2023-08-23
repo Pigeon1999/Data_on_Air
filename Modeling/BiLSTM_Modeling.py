@@ -451,7 +451,6 @@ def labeling(df):
     loaded_model = load_model('trained_BiLSTM_model') 
     score = loaded_model.predict(model.x_train)
     label = []
-    print(score)
     for i in range(0, len(score)):
         if (score[i][0] > 0.5):
             label.append(1)
@@ -464,7 +463,6 @@ def labeling(df):
     print(label.count(1))
     print(label.count(0))
 
-    
     df['label'] = label
     
     return df
@@ -521,14 +519,20 @@ count = 0
 train_df = snu_df
 
 while True:
-    
-    df = naver_df[0 + (count * 30) : 30 + (count * 30)]
-    df = labeling(df)
-        
-    train_df = train_df.append(df)
-    #train_df = token(train_df).match_label() 
-    make_model(train_df)
+    try:
+        df = naver_df[0 + (count * 100) : 100 + (count * 100)]
+        df = labeling(df)
+            
+        train_df = train_df.append(df)
+        #train_df = token(train_df).match_label() 
+        make_model(train_df)
 
-    count = count + 1
+        count = count + 1
+    except:
+        break
 
+#train data 168개 TF 1:1비율학습하여
+#정확도 45.24% 
+#naver data/youtube 100개씩 자동 라벨링하여 train에 추가 
+#최종 57.01%
 
