@@ -365,7 +365,7 @@ class Model:
         self.model.compile(loss = 'sparse_categorical_crossentropy', optimizer = 'adam', metrics = ['accuracy'])
 
         # 모델 학습
-        trained_model = self.model.fit(self.x_train, self.y_train, epochs = 4, callbacks=[es, mc], batch_size = 256, validation_split = 0.2)
+        trained_model = self.model.fit(self.x_train, self.y_train, epochs = 5, callbacks=[es, mc], batch_size = 256, validation_split = 0.2)
         self.model.save('trained_BiLSTM_model') 
         
     def evaluate_model(self):
@@ -462,10 +462,10 @@ def labeling(df):
     loaded_model = load_model('trained_BiLSTM_model') 
     score = loaded_model.predict(model.x_train)
     #y_test = np.argmax(score, axis=1)
-    
+    print(score)
     label = []
     for i in range(0, len(score)):
-        if (score[i][0] > 0.2):
+        if (score[i][0] > 0.14):
             label.append(1)
         else:
             label.append(0)
@@ -545,15 +545,15 @@ trained_model = make_model(snu_df)
 
 ###########################################################################################
 # 4. 네이버 / 유튜브 TF예측 하면서 BiLSTM모델 생성 
-naver_df = pd.read_csv('Naver_keyword_data.csv', encoding = 'utf-8')
-youtube_df = pd.read_csv('Youtube_keyword_data.csv', encoding = 'utf-8')
+naver_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Naver_keyword_data.csv', encoding = 'utf-8')
+youtube_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Youtube_keyword_data.csv', encoding = 'utf-8')
 new_df = naver_df.append(youtube_df)
 new_df = Model().list_to_str(new_df)
 count = 0
 train_df = snu_df
 
 while True:
-    df = naver_df[0 + (count * 50) : 50 + (count * 50)]
+    df = naver_df[0 + (count * 100) : 100 + (count * 100)]
     df = labeling(df)
     
     train_df = train_df.append(df)
