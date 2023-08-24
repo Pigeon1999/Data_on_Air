@@ -408,6 +408,7 @@ class Model:
         loaded_model = load_model('trained_BiLSTM_model')  
         score = loaded_model.predict(self.x_train)
         
+        correct_data = 0
         for i in range(0, len(self.x_train)):
             if(score[i][0] > 0.5):
                 if self.y_train[i] == 1:
@@ -465,7 +466,7 @@ def labeling(df):
     print(score)
     label = []
     for i in range(0, len(score)):
-        if (score[i][0] > 0.14):
+        if (score[i][0] > 0.3):
             label.append(1)
         else:
             label.append(0)
@@ -487,21 +488,6 @@ def labeling(df):
 #csv = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'cp949')
 #youtube_df = preprocessing(csv, 2)                                                        
 ###########################################################################################
-
-'''
-df = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/SNU_data.csv', encoding = 'cp949')    
-Token = token(df)
-df = Token.token_processing() # 3. 토큰화
-df.to_csv('SNU_keyword_data.csv', index = False)
-df = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/Naver_data.csv', encoding = 'utf-8')  
-Token = token(df)
-df = Token.token_processing() # 3. 토큰화
-df.to_csv('Naver_keyword_data.csv', index = False)
-df = pd.read_csv('D:/GitHub/Data_on_Air/Dataset/Youtube_data.csv', encoding = 'utf-8')
-Token = token(df)
-df = Token.token_processing() # 3. 토큰화
-df.to_csv('Youtube_keyword_data.csv', index = False)
-'''
 
 ###########################################################################################
 # 2. 데이터 간의 토큰 길이 조정 
@@ -526,59 +512,75 @@ df.to_csv('Youtube_keyword_data.csv', index = False)
 #youtube_df.to_csv('Youtube_keyword_data.csv', index = False)
 ###########################################################################################
 
-###########################################################################################
-# 3. SNU_keyword_data로 BiLSTM모델 생성 
-#snu_df = pd.read_csv('SNU_keyword_data.csv', encoding = 'utf-8')
-snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
-snu_df = Model().list_to_str(snu_df) 
+def main():
+    ###########################################################################################
+    # 3. SNU_keyword_data로 BiLSTM모델 생성 
+    #snu_df = pd.read_csv('SNU_keyword_data.csv', encoding = 'utf-8')
+    snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
+    snu_df = Model().list_to_str(snu_df) 
 
-oversampler = RandomOverSampler(random_state=42)
-x = snu_df.drop('label', axis=1)
-y = snu_df['label']
-X_resampled, y_resampled = oversampler.fit_resample(x, y)
-snu_df = pd.DataFrame(X_resampled, columns=x.columns)
-snu_df['label'] = y_resampled
-
-snu_df = token(snu_df).match_label() 
-trained_model = make_model(snu_df)
-###########################################################################################
-
-###########################################################################################
-# 4. 네이버 / 유튜브 TF예측 하면서 BiLSTM모델 생성 
-naver_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Naver_keyword_data.csv', encoding = 'utf-8')
-youtube_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Youtube_keyword_data.csv', encoding = 'utf-8')
-new_df = naver_df.append(youtube_df)
-new_df = Model().list_to_str(new_df)
-count = 0
-train_df = snu_df
-
-while True:
-    df = naver_df[0 + (count * 100) : 100 + (count * 100)]
-    df = labeling(df)
-    
-    train_df = train_df.append(df)
     oversampler = RandomOverSampler(random_state=42)
-    x = train_df.drop('label', axis=1)
-    y = train_df['label']
+    x = snu_df.drop('label', axis=1)
+    y = snu_df['label']
     X_resampled, y_resampled = oversampler.fit_resample(x, y)
-    train_df = pd.DataFrame(X_resampled, columns=x.columns)
-    train_df['label'] = y_resampled
-    #train_df = token(train_df).match_label() 
-    make_model(train_df)
+    snu_df = pd.DataFrame(X_resampled, columns=x.columns)
+    snu_df['label'] = y_resampled
 
-###########################################################################################
+    snu_df = token(snu_df).match_label() 
+    trained_model = make_model(snu_df)
+    ###########################################################################################
+
+    ###########################################################################################
+    # 4. 네이버 / 유튜브 TF예측 하면서 BiLSTM모델 생성 
+    naver_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Naver_keyword_data.csv', encoding = 'utf-8')
+    youtube_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Youtube_keyword_data.csv', encoding = 'utf-8')
+    new_df = naver_df.append(youtube_df)
+    new_df = Model().list_to_str(new_df)
+    train_df = snu_df
+
+    count = 0
+    start = 0 + count * 200
+    end = 200 + count * 200
+    while True:
+        df = naver_df[start:end]
+        df = labeling(df)
+        
+        train_df = train_df.append(df)
+        '''
+        oversampler = RandomOverSampler(random_state=42)
+        x = train_df.drop('label', axis=1)
+        y = train_df['label']
+        X_resampled, y_resampled = oversampler.fit_resample(x, y)
+        train_df = pd.DataFrame(X_resampled, columns=x.columns)
+        train_df['label'] = y_resampled
+        '''
+        #train_df = token(train_df).match_label() 
+        make_model(train_df)
+        
+        count = count + 1
+    ###########################################################################################
+
+main()
+
 
 ###########################################################################################
 # 5. label을 알고 있는 SNU_data로 재검증
 #model = Model()
-#snu_df = pd.read_csv('SNU_keyword_data.csv', encoding = 'utf-8')
+#snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
 #snu_df = model.list_to_str(snu_df)
 #model.word_embedding(snu_df)
 #model.predict_model()
 ###########################################################################################
 
-#train data 168개 TF 1:1비율학습하여
-#정확도 45.24% 
-#naver data/youtube 100개씩 자동 라벨링하여 train에 추가 
-#최종 57.01%
+# 경우 1 : 10개씩 증가하는 라벨링 데이터 학습...  / epochs = 5, label_rate = 0.5
+#         테스트정확도 : 0.6217 / snu대입 : 0.5042
 
+# 경우 2 : 5개씩 증가하는 라벨링 데이터 학습... / epochs = 5, label_rate = 0.5
+#         테스트정확도 : 0.6386 / snu대입 : 0.4648
+# 폐기... 너무 오래걸려
+
+# 경우 3 : 10개씩 증가하는 라벨링 데이터 학습... / epochs = 6, label_rate = 0.3
+#         테스트정확도 : 0.6313 / snu대입 : 0.4535
+
+# 경우 4 : 고정 400개씩 라벨링 데이터 학습... / epochs = 5, label_rate = 0.3
+#         테스트정확도 : 0. / snu대입 : 0.
