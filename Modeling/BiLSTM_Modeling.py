@@ -379,7 +379,7 @@ class Model:
         score = loaded_model.predict(self.x_test) # 예측
         
         for i in range(0, len(self.x_test)):
-            if(score[i][1] > 0.5):
+            if(score[i][0] > 0.5):
                 if self.y_test[i] == 1:
                     correct_data = correct_data + 1
             else:
@@ -390,21 +390,17 @@ class Model:
         
     def predict_model(self):
         loaded_model = load_model('trained_BiLSTM_model')  
-        score = loaded_model.predict(self.x_test) # 예측
+        score = loaded_model.predict(self.x_train)
         
-        for i in range(0, len(self.x_test)):
-            if(score[i][1] > 0.2):
-                if self.y_test[i] == 1:
+        for i in range(0, len(self.x_train)):
+            if(score[i][0] > 0.5):
+                if self.y_train[i] == 1:
                     correct_data = correct_data + 1
             else:
-                if self.y_test[i] == 0:
+                if self.y_train[i] == 0:
                     correct_data = correct_data + 1
-        print(f'정답률 {len(self.y_test)}개중 {correct_data}개 정답.')
-        print(f'{correct_data/len(self.y_test) * 100:.2f}%')            
-        
-    def labeling(self):
-        loaded_model = load_model('trained_BiLSTM_model') 
-        score = loaded_model.predict(self.x_test)
+        print(f'정답률 {len(self.y_train)}개중 {correct_data}개 정답.')
+        print(f'{correct_data/len(self.y_train) * 100:.2f}%')            
 
 #######################################################################################################################################################
 
@@ -457,9 +453,6 @@ def labeling(df):
         else:
             label.append(0)
     
-    #unlabeled_predictions = loaded_model.predict(model.x_train)
-    #label = np.argmax(unlabeled_predictions, axis=1)
-    
     print(label.count(1))
     print(label.count(0))
 
@@ -470,11 +463,11 @@ def labeling(df):
 ###########################################################################################
 # 1. 전처리 + 토큰화까지 과정 (** 오래 걸림!!! 최소 3시간 **)                                                            
 #csv = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\SNU_data.csv', encoding = 'cp949')    
-#snu_df = preprocessing(csv)                                                            
+#snu_df = preprocessing(csv, 0)                                                            
 #csv = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Naver_data.csv', encoding = 'cp949')  
-#naver_df = preprocessing(csv)                                                          
+#naver_df = preprocessing(csv, 1)                                                          
 #csv = pd.read_csv('D:\GitHub\Data_on_Air\Dataset\Youtube_data.csv', encoding = 'cp949')
-#youtube_df = preprocessing(csv)                                                        
+#youtube_df = preprocessing(csv, 2)                                                        
 ###########################################################################################
 
 ###########################################################################################
@@ -500,36 +493,45 @@ def labeling(df):
 #youtube_df.to_csv('Youtube_keyword_data.csv', index = False)
 ###########################################################################################
 
-
 ###########################################################################################
 # 3. SNU_keyword_data로 BiLSTM모델 생성 
-snu_df = pd.read_csv('SNU_keyword_data.csv', encoding = 'utf-8')
-snu_df = Model().list_to_str(snu_df) 
-snu_df = token(snu_df).match_label() 
-make_model(snu_df)
+#snu_df = pd.read_csv('SNU_keyword_data.csv', encoding = 'utf-8')
+#snu_df = Model().list_to_str(snu_df) 
+#snu_df = token(snu_df).match_label() 
+#make_model(snu_df)
 ###########################################################################################
 
 ###########################################################################################
-# 4. 네이버 TF예측
-naver_df = pd.read_csv('Naver_keyword_data.csv', encoding = 'utf-8')
-youtube_df = pd.read_csv('Youtube_keyword_data.csv', encoding = 'utf-8')
-new_df = naver_df.append(youtube_df)
-new_df = Model().list_to_str(new_df)
-count = 0
-train_df = snu_df
+# 4. 네이버 / 유튜브 TF예측 하면서 BiLSTM모델 생성 
+#naver_df = pd.read_csv('Naver_keyword_data.csv', encoding = 'utf-8')
+#youtube_df = pd.read_csv('Youtube_keyword_data.csv', encoding = 'utf-8')
+#new_df = naver_df.append(youtube_df)
+#new_df = Model().list_to_str(new_df)
+#count = 0
+#train_df = snu_df
+#
+#while True:
+#    try:
+#        df = naver_df[0 + (count * 100) : 100 + (count * 100)]
+#        df = labeling(df)
+#            
+#        train_df = train_df.append(df)
+#        #train_df = token(train_df).match_label() 
+#        make_model(train_df)
+#
+#        count = count + 1
+#    except:
+#        break
+###########################################################################################
 
-while True:
-    try:
-        df = naver_df[0 + (count * 100) : 100 + (count * 100)]
-        df = labeling(df)
-            
-        train_df = train_df.append(df)
-        #train_df = token(train_df).match_label() 
-        make_model(train_df)
-
-        count = count + 1
-    except:
-        break
+###########################################################################################
+# 5. label을 알고 있는 SNU_data로 재검증
+#model = Model()
+#snu_df = pd.read_csv('SNU_keyword_data.csv', encoding = 'utf-8')
+#snu_df = model.list_to_str(snu_df)
+#model.word_embedding(snu_df)
+#model.predict_model()
+###########################################################################################
 
 #train data 168개 TF 1:1비율학습하여
 #정확도 45.24% 
