@@ -365,7 +365,7 @@ class Model:
         self.model.compile(loss = 'sparse_categorical_crossentropy', optimizer = 'adam', metrics = ['accuracy'])
 
         # 모델 학습
-        trained_model = self.model.fit(self.x_train, self.y_train, epochs = 5, callbacks=[es, mc], batch_size = 256, validation_split = 0.2)
+        trained_model = self.model.fit(self.x_train, self.y_train, epochs = 7, callbacks=[es, mc], batch_size = 256, validation_split = 0.2)
         self.model.save('trained_BiLSTM_model') 
         
     def evaluate_model(self):
@@ -466,7 +466,7 @@ def labeling(df):
     print(score)
     label = []
     for i in range(0, len(score)):
-        if (score[i][0] > 0.3):
+        if (score[i][0] > 0.15):
             label.append(1)
         else:
             label.append(0)
@@ -526,7 +526,6 @@ def main():
     snu_df = pd.DataFrame(X_resampled, columns=x.columns)
     snu_df['label'] = y_resampled
 
-    snu_df = token(snu_df).match_label() 
     trained_model = make_model(snu_df)
     ###########################################################################################
 
@@ -538,38 +537,41 @@ def main():
     new_df = Model().list_to_str(new_df)
     train_df = snu_df
 
-    count = 0
-    start = 0 + count * 200
-    end = 200 + count * 200
+    start = 0
+    end = 10
     while True:
-        df = naver_df[start:end]
-        df = labeling(df)
-        
-        train_df = train_df.append(df)
-        '''
-        oversampler = RandomOverSampler(random_state=42)
-        x = train_df.drop('label', axis=1)
-        y = train_df['label']
-        X_resampled, y_resampled = oversampler.fit_resample(x, y)
-        train_df = pd.DataFrame(X_resampled, columns=x.columns)
-        train_df['label'] = y_resampled
-        '''
-        #train_df = token(train_df).match_label() 
-        make_model(train_df)
-        
-        count = count + 1
+        try:
+            for count in range(1, len(train_df)):
+                for _ in range(0, 4):
+                    df = naver_df[start:end]
+                    df = labeling(df)
+                    
+                    train_df = train_df.append(df)
+                    make_model(train_df)
+                    
+                    start = end
+                    end = end + count * 10               
+        except:
+            pass
     ###########################################################################################
 
-main()
+
+#main()
 
 
 ###########################################################################################
 # 5. label을 알고 있는 SNU_data로 재검증
-#model = Model()
-#snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
-#snu_df = model.list_to_str(snu_df)
-#model.word_embedding(snu_df)
-#model.predict_model()
+model = Model()
+snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
+snu_df = model.list_to_str(snu_df)
+oversampler = RandomOverSampler(random_state=42)
+x = snu_df.drop('label', axis=1)
+y = snu_df['label']
+X_resampled, y_resampled = oversampler.fit_resample(x, y)
+snu_df = pd.DataFrame(X_resampled, columns=x.columns)
+snu_df['label'] = y_resampled
+model.word_embedding(snu_df)
+model.predict_model()
 ###########################################################################################
 
 # 경우 1 : 10개씩 증가하는 라벨링 데이터 학습...  / epochs = 5, label_rate = 0.5
@@ -582,5 +584,10 @@ main()
 # 경우 3 : 10개씩 증가하는 라벨링 데이터 학습... / epochs = 6, label_rate = 0.3
 #         테스트정확도 : 0.6313 / snu대입 : 0.4535
 
-# 경우 4 : 고정 400개씩 라벨링 데이터 학습... / epochs = 5, label_rate = 0.3
-#         테스트정확도 : 0. / snu대입 : 0.
+# 경우 4 : 10개씩 증가하는 라벨링 데이터 학습... / epochs = 5, label_rate = 0.3
+#         테스트정확도 : 0.6217 / snu대입 : 0.3944
+# 12:46 ~ 1:21
+
+# 경우 5 : 10 * n개씩 5번씩, 증가하는 라벨링 데이터 학습... / epochs = 7, label_rate = 0.2
+#         테스트정확도 : 0.xxxx / snu대입 : 0.5680
+# 1:54 ~ 3:15
