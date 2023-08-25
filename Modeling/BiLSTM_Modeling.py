@@ -328,7 +328,7 @@ class Model:
 
         ###############################################################################################################
         # 모델 학습 / # epochs : 몇번 시행할지 / batch_size : 한번에 얼마나 많은 데이터를 처리할지.
-        trained_model = self.model.fit(self.x_train, self.y_train, epochs = 6, callbacks=[es, mc], batch_size = 32, validation_split = 0.2)
+        trained_model = self.model.fit(self.x_train, self.y_train, epochs = 7, callbacks=[es, mc], batch_size = 128, validation_split = 0.2)
         ###############################################################################################################
         self.model.save('trained_BiLSTM_model') 
         
@@ -516,7 +516,8 @@ def main():
                 make_model(train_df)
                 
                 start = end
-                end = end + count * 100     
+                end = end + count * 100    
+                predict()      
             ''' 
             
             df = naver_df[start:end]
@@ -533,7 +534,7 @@ def main():
             
             start = end
             ###############################################################################################################
-            end = end + 100 # 몇개씩 라벨링할지
+            end = end + 10 # 몇개씩 라벨링할지
             ###############################################################################################################
             predict()      
     except:
@@ -576,6 +577,6 @@ main()
 #         테스트정확도 : 0. / snu대입 : 0.47
 # 6:30 ~ 중지 
 
-# 경우 8 : 개씩 증가하는 라벨링 데이터 학습... / epochs = , label_rate = , batch = , vector = 500
+# 경우 8 : 10개씩 증가하는 라벨링 데이터 학습... / epochs = 7, label_rate =0.1 , batch =128 , vector = 500
 #         테스트정확도 : 0. / snu대입 : 0.
 # 
