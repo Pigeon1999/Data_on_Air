@@ -30,7 +30,7 @@ git clone https://github.com/Pigeon1999/Data_on_Air.git
 
 Repository의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/main/requirements.txt)를 사용합니다. 
 ```
-!pip install -r requirement.txt
+!pip install -r /content/Data_on_Air/requirements.txt
 ```
 
 # 사용 방법
