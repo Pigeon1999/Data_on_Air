@@ -24,7 +24,7 @@ from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dense
+from tensorflow.keras.layers import Embedding, Bidirectional, LSTM, Dense, BatchNormalization, Input
 nltk.download('punkt')
 
 # 초기 설정
@@ -210,47 +210,6 @@ class token(pre_process):
         
         return self.df
 
-    '''
-    # 명사가 아닌 단어 제거 & train data와의 키워드 갯수 범위 조정 
-    def noun_filter(self):
-        if type(self.df['상세내용'][0]) == str:
-            row_list = []
-            for row in self.df['상세내용']:
-                row = ast.literal_eval(row) # 문자열의 리스트화
-                row_list.append(row)         
-            self.df['상세내용'] = row_list
-        
-        
-        # 품사 분석기 초기화
-        model = Word2Vec(sentences = self.df['상세내용'], vector_size = 280, window = 10, min_count = 3, workers = 4, sg = 1)
-        kkma = Kkma()
-        result = model.wv.most_similar("경제", topn=15000) # 경제와 관련된 상위 15,000개 가져오기
-    
-        # 명사 걸러내기
-        filtered_result = []
-        for word, score in result: # word가 단어, score가 유사 비율(%)
-            # 단어 품사 분석
-            pos_tags = kkma.pos(word)
-            for _, tag in pos_tags:
-                if tag == 'NNG':  # 명사인 경우만 추가
-                    filtered_result.append(word)
-                    break
-        
-        for row in range(0, len(self.df)):
-            df_data = self.df['상세내용'][row]
-            result = list(set(df_data) & set(filtered_result))                       
-            self.df['상세내용'][row] = result
-            
-        # 키워드가 7개 이하, 70개 이상이면 제거
-        for row in range(0, len(self.df)):
-            if len(self.df['상세내용'][row]) <= 7 or len(self.df['상세내용'][row]) >= 70:
-                self.df = self.df.drop(row)
-        self.df['row_id'] = range(0, len(self.df))
-        self.df.index = range(0, len(self.df))
-        
-        return self.df
-        '''
-
     def match_label(self):
         T = self.df[self.df['label'] == 1]
         F = self.df[self.df['label'] == 0]
@@ -293,8 +252,10 @@ class Model:
         return df     
     
     def word_embedding(self, df):
+        ###############################################################################################################
         # Word2Vec 모델로 학습된 임베딩 벡터 가져오기
-        model = Word2Vec(sentences = df['상세내용'], vector_size = 280, window = 30, min_count = 3, workers = 4, sg = 1)
+        model = Word2Vec(sentences = df['상세내용'], vector_size = 500, window = 30, min_count = 3, workers = 4, sg = 1)
+        ###############################################################################################################
         embedding_matrix = model.wv.vectors
         self.vocab_size, self.embedding_dim = embedding_matrix.shape
 
@@ -357,6 +318,7 @@ class Model:
         self.model.add(Embedding(input_dim = self.vocab_size, output_dim = self.embedding_dim, input_length = None))  # 임베딩 레이어
         self.model.add(Bidirectional(LSTM(hidden_units, return_sequences = True)))  # 양방향 LSTM 레이어
         self.model.add(Bidirectional(LSTM(hidden_units)))  # 양방향 LSTM 레이어
+        self.model.add(BatchNormalization())
         self.model.add(Dense(output_classes, activation = 'softmax'))  # 출력 레이어
 
         es = EarlyStopping(monitor = 'val_loss', mode = 'min', verbose = 1, patience = 4)
@@ -364,8 +326,10 @@ class Model:
 
         self.model.compile(loss = 'sparse_categorical_crossentropy', optimizer = 'adam', metrics = ['accuracy'])
 
-        # 모델 학습
-        trained_model = self.model.fit(self.x_train, self.y_train, epochs = 7, callbacks=[es, mc], batch_size = 256, validation_split = 0.2)
+        ###############################################################################################################
+        # 모델 학습 / # epochs : 몇번 시행할지 / batch_size : 한번에 얼마나 많은 데이터를 처리할지.
+        trained_model = self.model.fit(self.x_train, self.y_train, epochs = 6, callbacks=[es, mc], batch_size = 32, validation_split = 0.2)
+        ###############################################################################################################
         self.model.save('trained_BiLSTM_model') 
         
     def evaluate_model(self):
@@ -388,21 +352,6 @@ class Model:
         # F1 스코어 계산
         f1 = f1_score(true_labels, predicted_labels, average='weighted')
         print("F1 테스트: {}".format(f1))
-        
-        '''
-        correct_data = 0
-        score = loaded_model.predict(self.x_test) # 예측
-        
-        for i in range(0, len(self.x_test)):
-            if(score[i][0] > 0.5):
-                if self.y_test[i] == 1:
-                    correct_data = correct_data + 1
-            else:
-                if self.y_test[i] == 0:
-                    correct_data = correct_data + 1
-        print(f'정답률 {len(self.y_test)}개중 {correct_data}개 정답.')
-        print(f'{correct_data/len(self.y_test) * 100:.2f}%')
-        '''
         
     def predict_model(self):
         loaded_model = load_model('trained_BiLSTM_model')  
@@ -457,7 +406,7 @@ def make_model(df):
 # 예측하고 싶은 Naver/Youtube data중 택하여 자동 labeling
 def labeling(df):
     model = Model()
-    df = model.list_to_str(df)
+    new_df = model.list_to_str(df)
     model.word_embedding(df)
 
     loaded_model = load_model('trained_BiLSTM_model') 
@@ -466,17 +415,19 @@ def labeling(df):
     print(score)
     label = []
     for i in range(0, len(score)):
-        if (score[i][0] > 0.15):
+        ###############################################################################################################
+        if (score[i][0] > 0.1): # 몇퍼센트 이상을 True로 볼지.
+        ###############################################################################################################
             label.append(1)
         else:
             label.append(0)
-    
+            
+    new_df['label'] = label
+        
     print(label.count(1))
     print(label.count(0))
-
-    df['label'] = label
     
-    return df
+    return new_df
     #return model.x_train, y_test
 
 ###########################################################################################
@@ -512,10 +463,25 @@ def labeling(df):
 #youtube_df.to_csv('Youtube_keyword_data.csv', index = False)
 ###########################################################################################
 
+def predict():
+    model = Model()
+    snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
+    snu_df = model.list_to_str(snu_df)
+    snu_df = token(snu_df).match_label()
+    '''
+    oversampler = RandomOverSampler(random_state=42)
+    x = snu_df.drop('label', axis=1)
+    y = snu_df['label']
+    X_resampled, y_resampled = oversampler.fit_resample(x, y)
+    snu_df = pd.DataFrame(X_resampled, columns=x.columns)
+    snu_df['label'] = y_resampled
+    '''
+    model.word_embedding(snu_df)
+    model.predict_model()
+
 def main():
     ###########################################################################################
     # 3. SNU_keyword_data로 BiLSTM모델 생성 
-    #snu_df = pd.read_csv('SNU_keyword_data.csv', encoding = 'utf-8')
     snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
     snu_df = Model().list_to_str(snu_df) 
 
@@ -538,40 +504,50 @@ def main():
     train_df = snu_df
 
     start = 0
-    end = 10
-    while True:
-        try:
-            for count in range(1, len(train_df)):
-                for _ in range(0, 4):
-                    df = naver_df[start:end]
-                    df = labeling(df)
-                    
-                    train_df = train_df.append(df)
-                    make_model(train_df)
-                    
-                    start = end
-                    end = end + count * 10               
-        except:
-            pass
+    end = 200
+    try:
+        for count in range(1, len(train_df)):
+            '''
+            for _ in range(0, 4):
+                df = naver_df[start:end]
+                df = labeling(df)
+                
+                train_df = train_df.append(df)
+                make_model(train_df)
+                
+                start = end
+                end = end + count * 100     
+            ''' 
+            
+            df = naver_df[start:end]
+            df = labeling(df)
+            
+            train_df = train_df.append(df)
+            oversampler = RandomOverSampler(random_state=42)
+            x = train_df.drop('label', axis=1)    
+            y = train_df['label']
+            X_resampled, y_resampled = oversampler.fit_resample(x, y)
+            train_df = pd.DataFrame(X_resampled, columns=x.columns)
+            train_df['label'] = y_resampled
+            make_model(train_df)
+            
+            start = end
+            ###############################################################################################################
+            end = end + 100 # 몇개씩 라벨링할지
+            ###############################################################################################################
+            predict()      
+    except:
+        pass
+    
     ###########################################################################################
 
-
-#main()
+main()
 
 
 ###########################################################################################
-# 5. label을 알고 있는 SNU_data로 재검증
-model = Model()
-snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
-snu_df = model.list_to_str(snu_df)
-oversampler = RandomOverSampler(random_state=42)
-x = snu_df.drop('label', axis=1)
-y = snu_df['label']
-X_resampled, y_resampled = oversampler.fit_resample(x, y)
-snu_df = pd.DataFrame(X_resampled, columns=x.columns)
-snu_df['label'] = y_resampled
-model.word_embedding(snu_df)
-model.predict_model()
+# 요소 
+# epochs / batch_size / vector / page / label_rate
+#       331p             257p    536p      419p
 ###########################################################################################
 
 # 경우 1 : 10개씩 증가하는 라벨링 데이터 학습...  / epochs = 5, label_rate = 0.5
@@ -588,6 +564,18 @@ model.predict_model()
 #         테스트정확도 : 0.6217 / snu대입 : 0.3944
 # 12:46 ~ 1:21
 
-# 경우 5 : 10 * n개씩 5번씩, 증가하는 라벨링 데이터 학습... / epochs = 7, label_rate = 0.2
+# 경우 5 : 10 * n개씩 5번씩, 증가하는 라벨링 데이터 학습... / epochs = 7, label_rate = 0.15, batch = 256, vector = 300
 #         테스트정확도 : 0.65xx / snu대입 : 0.5680
 # 1:54 ~ 3:15
+
+# 경우 6 : 200개씩 증가하는 라벨링 데이터 학습... / epochs = 8, label_rate = 0.5, batch = 32, 배치 정규화
+#         테스트정확도 : 0.74xx / snu대입 : 0.47xx
+# 5:11 ~ 6:25
+
+# 경우 7 : 100개씩 증가하는 라벨링 데이터 학습... / epochs = 7, label_rate = 0.1, batch = 32, 배치 정규화 / vector = 500
+#         테스트정확도 : 0. / snu대입 : 0.47
+# 6:30 ~ 중지 
+
+# 경우 8 : 개씩 증가하는 라벨링 데이터 학습... / epochs = , label_rate = , batch = , vector = 500
+#         테스트정확도 : 0. / snu대입 : 0.
+# 
