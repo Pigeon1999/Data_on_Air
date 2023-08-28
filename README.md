@@ -40,20 +40,23 @@ Repository의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/
 #### Crawling_SNU_data.py : snu_factcheck 사이트 경제 분야 크롤링 
 ```
 # 경제분야의 페이지를 start부터 end까지 크롤링
+
 Crawling_SNU_data(start, end)
 ```
 
 #### Crawling_Naver_data.py : 네이버 경제 분야 크롤링 
 ```
 # 연관 키워드관련 기사 크롤링
-# SNU_keyword_data.csv 파일을 DataFrame으로 불러와 인자로 사용합니다. 
+# SNU_keyword_data.csv 파일을 DataFrame으로 불러와 인자로 사용합니다.
+
 Crawling_Naver_data(SNU_keyword_data)
 ```
 
 #### Crawling_Youtube_data.py : 유튜브 경제 분야 크롤링 
 ```
 # 연관 키워드관련 영상 크롤링
-# SNU_keyword_data.csv 파일을 DataFrame으로 불러와 인자로 사용합니다. 
+# SNU_keyword_data.csv 파일을 DataFrame으로 불러와 인자로 사용합니다.
+
 Crawling_Youtube_data(SNU_keyword_df)
 ```
 
