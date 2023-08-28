@@ -39,28 +39,22 @@ Repository의 [requirements.txt](https://github.com/Pigeon1999/Data_on_Air/blob/
 
 #### Crawling_SNU_data.py : snu_factcheck 사이트 경제 분야 크롤링 
 ```
-from Data_on_Air.Modeling.Crawling_SNU_data import Crawling_SNU_data
-
 # 경제분야의 페이지를 start부터 end까지 크롤링
 Crawling_SNU_data(start, end)
 ```
 
 #### Crawling_Naver_data.py : 네이버 경제 분야 크롤링 
 ```
-from Data_on_Air.Modeling.Crawling_Naver_data import Crawling_Naver_data
-
-# 토큰화가 완료된 SNU_keyword_data.csv를 인자로 하여
 # 연관 키워드관련 기사 크롤링
+# SNU_keyword_data.csv 파일을 DataFrame으로 불러와 인자로 사용합니다. 
 Crawling_Naver_data(SNU_keyword_data)
 ```
 
 #### Crawling_Youtube_data.py : 유튜브 경제 분야 크롤링 
 ```
-from Data_on_Air.Modeling.Crawling_Youtube_data import Crawling_Youtube_data
-
-# 토큰화가 완료된 SNU_keyword_data.csv를 인자로 하여
-# 연관 키워드관련 영상 크롤링  
-Crawling_Youtube_data(SNU_keyword_data)
+# 연관 키워드관련 영상 크롤링
+# SNU_keyword_data.csv 파일을 DataFrame으로 불러와 인자로 사용합니다. 
+Crawling_Youtube_data(SNU_keyword_df)
 ```
 
 ### 2. Modeling 
@@ -68,24 +62,55 @@ Crawling_Youtube_data(SNU_keyword_data)
 #### BiLSTM_Modeling.py 
 #### ① preprocessing() : 데이터 셋의 전처리 및 토큰화
 ```
-from Data_on_Air.Modeling.BiLSTM_Modeling import preprocessing
-
 # 크롤링한 데이터의 전처리 (0번 : snu_keyword. 1번 : naver_keyword, 2번 : youtube_keyword)
+# SNU_data.csv, Naver_data.csv, Youtube.csv 파일을 인자로 하여 사용합니다.
+
+# 전처리 + 토큰화까지 과정을 처리하고 DataFrame을 리턴받습니다.
+# 또한 {SNU/Naver/Youtube}_keyword_data.csv파일을 생성합니다. 
+
 df = preprocessing(df, num)
 ```
 
-#### ② make_model(df) : 전처리된 데이터로 Word2Vec와 BiLSTM기법 적용하여 모델 생성 
+#### ② main함수 : 
 ```
-from Data_on_Air.Modeling.BiLSTM_Modeling import make_model
+def main(): 
+    snu_df = pd.read_csv('SNU_keyword_data.csv', encoding = 'utf-8')
+    snu_df = Model().list_to_str(snu_df) 
 
-# 동일한 경로에 'trained_BiLSTM_model'라는 이름의 모델 생성
-make_model(df)
-```
+    # label비율 1:1을 위한 오버샘플링
+    oversampler = RandomOverSampler(random_state=42)
+    x = snu_df.drop('label', axis=1)
+    y = snu_df['label']
+    X_resampled, y_resampled = oversampler.fit_resample(x, y)
+    snu_df = pd.DataFrame(X_resampled, columns=x.columns)
+    snu_df['label'] = y_resampled
 
-#### ③ predict_model(x_test, y_test) : 생성된 학습 모델로 검증 데이터 예측 
-```
-from Data_on_Air.Modeling.BiLSTM_Modeling import predict_model
+     # label이 있는 데이터를 BiLSTM기법으로 훈련시켜 모델 생성&저장.
+    make_model(snu_df)
 
-# 코드 고정 
-predict_model(pre_process.x_test, pre_process.y_test)
+    # naver, youtube 데이터 결합
+    naver_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Naver_keyword_data.csv', encoding = 'utf-8')
+    youtube_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Youtube_keyword_data.csv', encoding = 'utf-8')
+    new_df = naver_df.append(youtube_df)
+    new_df = Model().list_to_str(new_df)
+    train_df = snu_df
+
+    count = 1
+    start = 0
+    end = 100
+    try:                                                                             
+        for count in range(1, len(train_df)): # 100 * n개 labeling을 5회 실행
+            for _ in range(0, 4):
+                df = naver_df[start:end]
+                df = labeling(df) # train_df를 훈련된 모델로 예측하여 labeling.
+                
+                train_df = train_df.append(df)
+                make_model(train_df) # labeling한 train_df와 snu_df를 합쳐 재학습. 
+                predict() # label을 알고 있는 snu_df로 모델 성능 확인 
+
+                start = end
+                end = end + count * 100
+        count = count + 1   
+    except:
+        pass
 ```
