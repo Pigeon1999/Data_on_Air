@@ -19,7 +19,6 @@
 - Visual Studio Code
 - Python 3.10.12
 
-
 # 설치 방법
 Repository를 clone합니다. 
 ```
