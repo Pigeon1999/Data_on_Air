@@ -411,13 +411,10 @@ def labeling(df):
 
     loaded_model = load_model('trained_BiLSTM_model') 
     score = loaded_model.predict(model.x_train)
-    #y_test = np.argmax(score, axis=1)
     print(score)
     label = []
     for i in range(0, len(score)):
-        ###############################################################################################################
         if (score[i][0] > 0.1): # 몇퍼센트 이상을 True로 볼지.
-        ###############################################################################################################
             label.append(1)
         else:
             label.append(0)
@@ -428,7 +425,6 @@ def labeling(df):
     print(label.count(0))
     
     return new_df
-    #return model.x_train, y_test
 
 ###########################################################################################
 # 1. 전처리 + 토큰화까지 과정 (** 오래 걸림!!! 최소 3시간 **)                                                            
@@ -463,120 +459,54 @@ def labeling(df):
 #youtube_df.to_csv('Youtube_keyword_data.csv', index = False)
 ###########################################################################################
 
-def predict():
-    model = Model()
-    snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
-    snu_df = model.list_to_str(snu_df)
-    snu_df = token(snu_df).match_label()
-    '''
-    oversampler = RandomOverSampler(random_state=42)
-    x = snu_df.drop('label', axis=1)
-    y = snu_df['label']
-    X_resampled, y_resampled = oversampler.fit_resample(x, y)
-    snu_df = pd.DataFrame(X_resampled, columns=x.columns)
-    snu_df['label'] = y_resampled
-    '''
-    model.word_embedding(snu_df)
-    model.predict_model()
-
-def main():
-    ###########################################################################################
-    # 3. SNU_keyword_data로 BiLSTM모델 생성 
-    snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
-    snu_df = Model().list_to_str(snu_df) 
-
-    oversampler = RandomOverSampler(random_state=42)
-    x = snu_df.drop('label', axis=1)
-    y = snu_df['label']
-    X_resampled, y_resampled = oversampler.fit_resample(x, y)
-    snu_df = pd.DataFrame(X_resampled, columns=x.columns)
-    snu_df['label'] = y_resampled
-
-    trained_model = make_model(snu_df)
-    ###########################################################################################
-
-    ###########################################################################################
-    # 4. 네이버 / 유튜브 TF예측 하면서 BiLSTM모델 생성 
-    naver_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Naver_keyword_data.csv', encoding = 'utf-8')
-    youtube_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Youtube_keyword_data.csv', encoding = 'utf-8')
-    new_df = naver_df.append(youtube_df)
-    new_df = Model().list_to_str(new_df)
-    train_df = snu_df
-
-    start = 0
-    end = 200
-    try:
-        for count in range(1, len(train_df)):
-            '''
-            for _ in range(0, 4):
-                df = naver_df[start:end]
-                df = labeling(df)
-                
-                train_df = train_df.append(df)
-                make_model(train_df)
-                
-                start = end
-                end = end + count * 100    
-                predict()      
-            ''' 
-            
-            df = naver_df[start:end]
-            df = labeling(df)
-            
-            train_df = train_df.append(df)
-            oversampler = RandomOverSampler(random_state=42)
-            x = train_df.drop('label', axis=1)    
-            y = train_df['label']
-            X_resampled, y_resampled = oversampler.fit_resample(x, y)
-            train_df = pd.DataFrame(X_resampled, columns=x.columns)
-            train_df['label'] = y_resampled
-            make_model(train_df)
-            
-            start = end
-            ###############################################################################################################
-            end = end + 10 # 몇개씩 라벨링할지
-            ###############################################################################################################
-            predict()      
-    except:
-        pass
-    
-    ###########################################################################################
-
-main()
-
-
 ###########################################################################################
-# 요소 
-# epochs / batch_size / vector / page / label_rate
-#       331p             257p    536p      419p
+# 3. 모델 생성 & 정확도 확인
+# def predict():
+#     model = Model()
+#     snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
+#     snu_df = model.list_to_str(snu_df)
+#     snu_df = token(snu_df).match_label()
+
+#     model.word_embedding(snu_df)
+#     model.predict_model()
+
+# def main():
+#     # 3. SNU_keyword_data로 BiLSTM모델 생성 
+#     snu_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/SNU_keyword_data.csv', encoding = 'utf-8')
+#     snu_df = Model().list_to_str(snu_df) 
+
+#     oversampler = RandomOverSampler(random_state=42)
+#     x = snu_df.drop('label', axis=1)
+#     y = snu_df['label']
+#     X_resampled, y_resampled = oversampler.fit_resample(x, y)
+#     snu_df = pd.DataFrame(X_resampled, columns=x.columns)
+#     snu_df['label'] = y_resampled
+
+#     trained_model = make_model(snu_df)
+
+#     # 4. 네이버 / 유튜브 TF예측 하면서 BiLSTM모델 생성 
+#     naver_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Naver_keyword_data.csv', encoding = 'utf-8')
+#     youtube_df = pd.read_csv('D:/Github/Data_on_Air/Dataset/Youtube_keyword_data.csv', encoding = 'utf-8')
+#     new_df = naver_df.append(youtube_df)
+#     new_df = Model().list_to_str(new_df)
+#     train_df = snu_df
+
+#     start = 0
+#     end = 200
+#     try:
+#         for count in range(1, len(train_df)):
+#             for _ in range(0, 4):
+#                 df = naver_df[start:end]
+#                 df = labeling(df)
+                
+#                 train_df = train_df.append(df)
+#                 make_model(train_df)
+                
+#                 start = end
+#                 end = end + count * 100    
+#                 predict()          
+#     except:
+#         pass
+
+#main()
 ###########################################################################################
-
-# 경우 1 : 10개씩 증가하는 라벨링 데이터 학습...  / epochs = 5, label_rate = 0.5
-#         테스트정확도 : 0.6217 / snu대입 : 0.5042
-
-# 경우 2 : 5개씩 증가하는 라벨링 데이터 학습... / epochs = 5, label_rate = 0.5
-#         테스트정확도 : 0.6386 / snu대입 : 0.4648
-# 폐기... 너무 오래걸려
-
-# 경우 3 : 10개씩 증가하는 라벨링 데이터 학습... / epochs = 6, label_rate = 0.3
-#         테스트정확도 : 0.6313 / snu대입 : 0.4535
-
-# 경우 4 : 10개씩 증가하는 라벨링 데이터 학습... / epochs = 5, label_rate = 0.3
-#         테스트정확도 : 0.6217 / snu대입 : 0.3944
-# 12:46 ~ 1:21
-
-# 경우 5 : 10 * n개씩 5번씩, 증가하는 라벨링 데이터 학습... / epochs = 7, label_rate = 0.15, batch = 256, vector = 300
-#         테스트정확도 : 0.65xx / snu대입 : 0.5680
-# 1:54 ~ 3:15
-
-# 경우 6 : 200개씩 증가하는 라벨링 데이터 학습... / epochs = 8, label_rate = 0.5, batch = 32, 배치 정규화
-#         테스트정확도 : 0.74xx / snu대입 : 0.47xx
-# 5:11 ~ 6:25
-
-# 경우 7 : 100개씩 증가하는 라벨링 데이터 학습... / epochs = 7, label_rate = 0.1, batch = 32, 배치 정규화 / vector = 500
-#         테스트정확도 : 0. / snu대입 : 0.47
-# 6:30 ~ 중지 
-
-# 경우 8 : 10개씩 증가하는 라벨링 데이터 학습... / epochs = 7, label_rate =0.1 , batch =128 , vector = 500
-#         테스트정확도 : 0. / snu대입 : 0.
-# 
